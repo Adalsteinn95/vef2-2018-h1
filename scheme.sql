@@ -17,6 +17,18 @@ CREATE TABLE Books (
     ISBN10       VARCHAR(10),
     author       VARCHAR(64),
     descripe     text,
-    category     serial references Categories(id)
+    category     serial references Categories(id),
+    datetime     timestamp,
+    pages        int,
+    language     VARCHAR(2)
+);
+
+CREATE TABLE readBooks(
+    authentication     VARCHAR(64),
+    userame      VARCHAR(64) REFERENCES Users(id),
+    book         VARCHAR(64) REFERENCES Books(id),
+    rating       int,
+    ratingtext   VARCHAR(128)
+
 );
 date timestamp with time zone not null default current_timestamp
