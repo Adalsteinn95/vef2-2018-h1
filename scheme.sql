@@ -14,9 +14,9 @@ CREATE TABLE Categories (
 CREATE TABLE Books (
     id           serial PRIMARY KEY,
     title        VARCHAR(64) NOT NULL,
-    ISBN10       VARCHAR(10),
+    ISBN12       VARCHAR(13) NOT NULL,
     author       VARCHAR(64),
-    descripe     text,
+    description     text,
     category     serial references Categories(id),
     datetime     timestamp,
     pages        int,
@@ -24,11 +24,10 @@ CREATE TABLE Books (
 );
 
 CREATE TABLE readBooks(
-    authentication     VARCHAR(64),
-    userame      VARCHAR(64) REFERENCES Users(id),
-    book         VARCHAR(64) REFERENCES Books(id),
+    id           serial PRIMARY KEY,
+    usernID      VARCHAR(64) REFERENCES Users(id),
+    bookID       VARCHAR(64) REFERENCES Books(id),
     rating       int,
     ratingtext   VARCHAR(128)
 
 );
-date timestamp with time zone not null default current_timestamp
