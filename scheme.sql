@@ -14,10 +14,11 @@ CREATE TABLE Categories (
 CREATE TABLE Books (
     id           serial PRIMARY KEY,
     title        VARCHAR(64) NOT NULL,
-    ISBN12       VARCHAR(13) NOT NULL,
+    ISBN13       VARCHAR(13) NOT NULL,
     author       VARCHAR(64),
     description     text,
     category     serial references Categories(id),
+    ISBN10       VARCHAR(10),
     datetime     timestamp,
     pages        int,
     language     VARCHAR(2)
