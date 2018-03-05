@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 const express = require('express');
@@ -10,13 +11,11 @@ const jwt = require('jsonwebtoken');
 
 const books = require('./books');
 const users = require('./users');
-// const login = require('./login');
 
 app.use(express.json());
 
 app.use('/books', books);
 app.use('/users', users.router);
-// app.use('/login', login);
 app.use(passport.initialize());
 
 const {
@@ -51,6 +50,7 @@ function requireAuthentication(req, res, next) {
   })(req, res, next);
 }
 
+
 /*
 GET skilar síðu af flokkum
 */
@@ -62,6 +62,7 @@ app.get('/categories', (req, res) => {
 /*
 POST býr til nýjan flokk og skilar
 */
+
 app.post(
   '/categories',
   check('name')
@@ -77,9 +78,11 @@ app.post(
   },
 );
 
+
 /*
 POST býr til notanda og skilar án lykilorðs hash
 */
+
 app.post(
   '/register',
   check('username')
@@ -106,6 +109,7 @@ app.post(
 /*
 POST með notendanafni og lykilorði skilar token
 */
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -141,6 +145,7 @@ function errorHandler(err, req, res, next) {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
 
 const { PORT: portlisten = 3000, HOST: host = '127.0.0.1' } = process.env;
 

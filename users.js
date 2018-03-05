@@ -1,4 +1,5 @@
 const express = require('express');
+
 const { check, validationResult } = require('express-validator/check');
 
 const router = express.Router();
@@ -131,6 +132,7 @@ router.get('/users/me/read', (req, res) => {
 /*
 POST býr til nýjan lestur á bók og skilar
 */
+
 router.post(
   '/users/me/read',
   check('rating')
@@ -142,8 +144,8 @@ router.post(
 );
 
 /*
-DELETE eyðir lestri bókar fyrir innskráðan notanda
-*/
+DELETE eyðir lestri bókar fyrir innskráðan notanda*/
+
 router.delete('/users/me/read/:id', (req, res) => {
   // do stuff
 });

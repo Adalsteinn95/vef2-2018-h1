@@ -1,6 +1,7 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator/check');
 
+
 const router = express.Router();
 
 /*
@@ -38,6 +39,7 @@ router.post(
     // do other stuff
   },
 );
+
 
 /*
 GET skilar síðu af bókum sem uppfylla leitarskilyrði, sjá að neðan
