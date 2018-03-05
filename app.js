@@ -128,6 +128,7 @@ app.post('/login', async (req, res) => {
   return res.status(401).json({ error: 'Invalid password' });
 });
 
+
 // eslint-disable-next-line
 function notFoundHandler(req, res, next) {
   res.status(404).json({ error: 'Not found' });

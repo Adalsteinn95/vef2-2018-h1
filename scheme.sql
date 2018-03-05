@@ -8,20 +8,21 @@ CREATE TABLE Users (
 
 CREATE TABLE Categories (
     id           serial PRIMARY KEY,
-    name         VARCHAR(64)
+    name         text UNIQUE NOT NULL
 );
 
 CREATE TABLE Books (
     id           serial PRIMARY KEY,
-    title        VARCHAR(64) NOT NULL,
-    ISBN13       VARCHAR(13) NOT NULL,
-    author       VARCHAR(64),
-    description     text,
-    category     serial references Categories(id),
+    title        text UNIQUE NOT NULL,
+    ISBN13       VARCHAR(13) UNIQUE NOT NULL,
+    author       text,
+    description  text,
+    category     text,
     ISBN10       VARCHAR(10),
-    datetime     timestamp,
-    pages        int,
-    language     VARCHAR(2)
+    published    timestamp,
+    pagecount    integer,
+    language     VARCHAR(2),
+    FOREIGN KEY (category) REFERENCES Categories (name)
 );
 
 CREATE TABLE readBooks(
