@@ -1,6 +1,6 @@
 CREATE TABLE Users (
     id           serial PRIMARY KEY,
-    userame      VARCHAR(64) NOT NULL,
+    username      VARCHAR(64) UNIQUE NOT NULL,
     password     VARCHAR(64) NOT NULL,
     name         VARCHAR(64) NOT NULL,
     image        VARCHAR(64)
