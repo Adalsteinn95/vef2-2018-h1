@@ -59,3 +59,5 @@ PATCH uppfærir bók
 router.post('/:id', (req, res) => {
   // do stuff
 });
+
+module.exports = router;

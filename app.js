@@ -1,17 +1,55 @@
+require('dotenv').config();
+
 const express = require('express');
 const { check, validationResult } = require('express-validator/check');
+const { Strategy, ExtractJwt } = require('passport-jwt');
+const passport = require('passport');
 
 const app = express();
+const jwt = require('jsonwebtoken');
 
 const books = require('./books');
 const users = require('./users');
-const login = require('./login');
+// const login = require('./login');
 
 app.use(express.json());
 
 app.use('/books', books);
-app.use('/users', users);
-app.use('/login', login);
+app.use('/users', users.router);
+// app.use('/login', login);
+app.use(passport.initialize());
+
+const {
+  PORT: port = 3000,
+  JWT_SECRET: jwtSecret,
+  TOKEN_LIFETIME: tokenLifetime = 20,
+} = process.env;
+
+if (!jwtSecret) {
+  console.error('JWT_SECRET not registered in .env');
+  process.exit(1);
+}
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwtSecret,
+};
+
+function requireAuthentication(req, res, next) {
+  return passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      const error = info.name === 'TokenExpiredError' ? 'expired token' : 'invalid token';
+      return res.status(401).json({ error });
+    }
+
+    req.user = user;
+    next();
+  })(req, res, next);
+}
 
 /*
 GET skilar síðu af flokkum
@@ -54,9 +92,11 @@ app.post(
     .isEmpty()
     .withMessage('Nafn má ekki vera tómt'),
   (req, res) => {
+    const { username = '', password = '', name = '' } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // do stuff
+      const result = users.createUser(username, password, name);
+      res.status(201).json(result);
     }
     // do other stuff
   },
@@ -65,8 +105,22 @@ app.post(
 /*
 POST með notendanafni og lykilorði skilar token
 */
-app.post('/login', (req, res) => {
-  // do stuff
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  const user = await users.findByUsername(username);
+  if (!user) {
+    return res.status(401).json({ error: 'No such user' });
+  }
+  const passwordIsCorrect = await users.comparePasswords(password, user.password);
+
+  if (passwordIsCorrect) {
+    const payload = { id: user.id };
+    const tokenOptions = { expiresIn: tokenLifetime };
+    const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
+    return res.json({ token });
+  }
+  return res.status(401).json({ error: 'Invalid password' });
 });
 
 // eslint-disable-next-line
@@ -87,8 +141,8 @@ function errorHandler(err, req, res, next) {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const { PORT: port = 3000, HOST: host = '127.0.0.1' } = process.env;
+const { PORT: portlisten = 3000, HOST: host = '127.0.0.1' } = process.env;
 
-app.listen(port, () => {
+app.listen(portlisten, () => {
   console.info(`Server running at http://${host}:${port}/`);
 });
