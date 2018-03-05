@@ -95,8 +95,9 @@ app.post(
     const { username = '', password = '', name = '' } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const result = users.createUser(username, password, name);
-      res.status(201).json(result);
+      users.createUser(username, password, name).then((result) => {
+        res.status(201).json({ result });
+      });
     }
     // do other stuff
   },
