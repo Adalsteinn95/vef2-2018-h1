@@ -65,7 +65,6 @@ async function readAllUsers() {
   const result = await query(queryString, null);
 
   return result.rows;
-
 }
 
 /**
@@ -126,7 +125,7 @@ async function alterUser({
 } = {}) {
   /* todo útfæra */
 
-  const values = [xss(username),xss(password),xss(image),xss(id),];
+  const values = [xss(username), xss(password), xss(image), xss(id)];
 
   const queryString = 'UPDATE users SET username = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
 
@@ -178,14 +177,16 @@ async function createCategory(name) {
 /**
  * Read all Books asynchronously.
  *
+ * @param {number}  offset - where to start
+ *
  * @returns {Promise} Promise representing an array of all Books object
  */
-async function readAllBooks() {
+async function readAllBooks(offset) {
   /* todo útfæra */
 
-  const queryString = 'SELECT * from Books';
+  const queryString = 'SELECT * from Books ORDER BY title LIMIT 10 OFFSET $1';
 
-  const result = await query(queryString, null);
+  const result = await query(queryString, [offset]);
 
   return result;
 }
@@ -245,8 +246,6 @@ async function createBook({
   const values = [xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10), xss(published), xss(pagecount), xss(language)];
 
   const result = await query(queryString, values);
-
-
 }
 
 /**
@@ -278,7 +277,9 @@ async function getReadBooks(userID) {
  *
  * @returns {Promise}  Promise representing of book
  */
-async function addReadBook({ userID, bookID, rating, ratingtext } = {}) {
+async function addReadBook({
+  userID, bookID, rating, ratingtext,
+} = {}) {
   /* to do */
 
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
@@ -301,14 +302,31 @@ async function addReadBook({ userID, bookID, rating, ratingtext } = {}) {
 async function del(userID, bookID) {
   /* todo útfæra */
 
-  const queryString  = 'DELETE FROM readBooks WHERE userID = $1 AND bookID = $2';
+  const queryString = 'DELETE FROM readBooks WHERE userID = $1 AND bookID = $2';
 
   const values = [xss(userID), xss(bookID)];
 
   const result = await query(queryString, values);
 
   return result;
+}
 
+/**
+ * search for books asynchronously.
+ *
+ * @param {string} title -title of the book
+ * @param {string} description -description of the book
+ *
+ *
+ * @returns {Promise} Promise representing array of books
+*/
+async function search(title, description, offset) {
+  const queryString = 'SELECT * from Books WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($2) ORDER BY title LIMIT 10 OFFSET $3';
+  const values = [xss(title), xss(description), offset];
+
+  const result = query(queryString, values);
+
+  return result;
 }
 
 module.exports = {
@@ -325,4 +343,5 @@ module.exports = {
   getReadBooks,
   addReadBook,
   del,
+  search,
 };

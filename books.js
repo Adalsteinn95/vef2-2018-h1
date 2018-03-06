@@ -8,11 +8,27 @@ const router = express.Router();
 /*
 GET skilar síðu af bókum
 */
+
+/* munum orugglegea ekki vilja hafa thetta svona */
+let OFFSET = 0;
+
 router.get('/', async (req, res) => {
   // do stuff
-  const result = await db.readAllBooks();
 
-  res.send(result.rows);
+
+  const { search } = req.query;
+
+  if (search === '' || search === undefined) {
+    const result = await db.readAllBooks(OFFSET);
+
+    res.send({ LIMIT: 10, OFFSET, books: result.rows });
+
+    OFFSET += 10;
+  } else {
+    const result = await db.search(search, search);
+    res.send({ LIMIT: 10, OFFSET, books: result.rows });
+    OFFSET += 10;
+  }
 });
 
 /*
@@ -44,13 +60,6 @@ router.post(
   },
 );
 
-
-/*
-GET skilar síðu af bókum sem uppfylla leitarskilyrði, sjá að neðan
-*/
-router.get('/books?search=query', (req, res) => {
-  // do stuff
-});
 
 /*
 GET skilar stakri bók
