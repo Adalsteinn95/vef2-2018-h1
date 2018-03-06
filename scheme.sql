@@ -27,9 +27,11 @@ CREATE TABLE Books (
 
 CREATE TABLE readBooks(
     id           serial PRIMARY KEY,
-    usernID      VARCHAR(64) REFERENCES Users(id),
-    bookID       VARCHAR(64) REFERENCES Books(id),
-    rating       int,
-    ratingtext   VARCHAR(128)
+    userID       serial REFERENCES Users(id),
+    bookID       serial REFERENCES Books(id),
+    rating       int    NOT NULL,
+    ratingtext   VARCHAR(128),
+    unique (userID, bookID)
 
 );
+

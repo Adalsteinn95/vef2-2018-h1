@@ -4,8 +4,8 @@ const {
 
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
-const csv = require('csvtojson');
 const bcrypt = require('bcrypt');
+const xss = require('xss');
 /**
  * Execute an SQL query.
  *
@@ -88,10 +88,10 @@ async function findByUsername(username) {
 
 /**
  * Read a single user asynchronously
- * 
+ *
  * @param {number} id - id of user
- * 
- * 
+ *
+ *
  * @returns {Promise} Promise representing the user object or null if not found
  */
 
@@ -108,13 +108,6 @@ async function findById(id) {
 }
 
 /**
- * 
- * 
- * 
- * 
- */
-
-/**
  * Update user asynchronously.
  *
  * @param {number} id - Id of user to update
@@ -129,8 +122,22 @@ async function alterUser({
   id,
   username,
   password,
+  image,
 } = {}) {
   /* todo útfæra */
+
+  const values = [xss(username),xss(password),xss(image),xss(id),];
+
+  const queryString = 'UPDATE users SET username = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
+
+  const result = await query(queryString, values);
+
+  if (result.rowCount === 0) {
+    /* not found */
+  }
+
+  /* success */
+  return result.rows[0];
 }
 
 /**
@@ -140,6 +147,12 @@ async function alterUser({
  */
 async function readAllCategories() {
   /* todo útfæra */
+
+  const queryString = 'SELECT * from categories';
+
+  const result = await query(queryString, null);
+
+  return result;
 }
 
 /**
@@ -153,11 +166,13 @@ async function readAllCategories() {
 async function createCategory(name) {
   /* todo útfæra */
   console.info(name);
-  const queryString = 'INSERT INTO Categories(name) VALUES($1)';
+  const queryString = 'INSERT INTO Categories(name) VALUES($1) RETURNING *';
 
   const values = [name];
 
   const result = await query(queryString, values);
+
+  return result.rows[0];
 }
 
 /**
@@ -167,6 +182,12 @@ async function createCategory(name) {
  */
 async function readAllBooks() {
   /* todo útfæra */
+
+  const queryString = 'SELECT * from Books';
+
+  const result = await query(queryString, null);
+
+  return result;
 }
 
 /**
@@ -178,6 +199,13 @@ async function readAllBooks() {
  */
 async function readOneBook(id) {
   /* todo útfæra */
+
+  const queryString = 'SELECT * from books WHERE id = $1';
+  const values = [xss(id)];
+
+  const result = query(queryString, values);
+
+  return result;
 }
 
 /**
@@ -211,16 +239,18 @@ async function createBook({
   /* todo útfæra */
   const queryString = 'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
 
-  if (pagecount = ' ') { pagecount = null; }
-  if (published = ' ') { published = null; }
+  if (pagecount === ' ') { pagecount = null; }
+  if (published === ' ') { published = null; }
 
-  const values = [title, isbn13, author, description, category, isbn10, published, pagecount, language];
+  const values = [xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10), xss(published), xss(pagecount), xss(language)];
 
   const result = await query(queryString, values);
+
+
 }
 
 /**
- * get read books
+ * get read books based on user id
  *
  * @param {number} userID
  *
@@ -228,6 +258,14 @@ async function createBook({
  */
 async function getReadBooks(userID) {
   /* todo */
+
+  const values = [xss(userID)];
+
+  const queryString = 'SELECT * from books WHERE id IN (SELECT bookid from readBooks where userid = $1)';
+
+  const result = await query(queryString, values);
+
+  return result.rows;
 }
 
 /**
@@ -235,73 +273,43 @@ async function getReadBooks(userID) {
  *
  * @param {number} userID
  * @param {number} bookID
+ * @param {number} rating
+ * @param {string} ratingtext
  *
  * @returns {Promise}  Promise representing of book
  */
-async function addReadBook(userID, bookID) {
+async function addReadBook({ userID, bookID, rating, ratingtext } = {}) {
   /* to do */
+
+  const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
+
+  const queryString = 'INSERT into readBooks(userid, bookid, rating) VALUES ($1, $2, $3) RETURNING *';
+
+  const result = await query(queryString, values);
+
+  return result;
 }
 
 /**
- * Delete a book asynchronously.
+ * Delete a read book asynchronously.
  *
- * @param {number} userID
+ * @param {number} userID - Id of user
  * @param {number} bookID - Id of note to delete
  *
  * @returns {Promise} Promise representing the boolean result of deleting the book
  */
 async function del(userID, bookID) {
   /* todo útfæra */
+
+  const queryString  = 'DELETE FROM readBooks WHERE userID = $1 AND bookID = $2';
+
+  const values = [xss(userID), xss(bookID)];
+
+  const result = await query(queryString, values);
+
+  return result;
+
 }
-
-/**
- * add books from csv synchronously
- *
- * @returns {boolean}
- *
- */
-async function addBooks() {
-  const csvFilePath = './data/books.csv';
-  const books = [];
-  csv()
-    .fromFile(csvFilePath)
-    .on('json', (jsonObj) => {
-      books.push(jsonObj);
-    })
-    .on('done', async () => {
-      /* ugly but it needs to like this we only got 100 connections to server */
-      for (let i = 0; i < books.length; i += 1) {
-        // eslint-disable-next-line
-        await createBook(books[i]); 
-      }
-    });
-}
-
-
-/**
- * add Categories from csv synchronously
- *
- * @returns {boolean}
- *
- */
-async function addCategories() {
-  const csvFilePath = './data/books.csv';
-  let books = [];
-  csv()
-    .fromFile(csvFilePath)
-    .on('json', (jsonObj) => {
-      books.push(jsonObj.category);
-    })
-    .on('done', async () => {
-      /* ugly but it needs to like this we only got 100 connections to server */
-      books = Array.from(new Set(books));
-      for (let i = 0; i < books.length; i += 1) {
-        // eslint-disable-next-line
-        await createCategory(books[i]); 
-      }
-    });
-}
-
 
 module.exports = {
   createUser,

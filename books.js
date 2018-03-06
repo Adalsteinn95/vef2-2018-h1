@@ -1,14 +1,18 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator/check');
 
+const db = require('./db');
 
 const router = express.Router();
 
 /*
 GET skilar síðu af bókum
 */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // do stuff
+  const result = await db.readAllBooks();
+
+  res.send(result.rows);
 });
 
 /*
