@@ -11,6 +11,8 @@ const jwt = require('jsonwebtoken');
 
 const books = require('./books');
 const users = require('./users');
+const db = require('./db');
+
 
 app.use(express.json());
 
@@ -98,7 +100,7 @@ app.post(
     const { username = '', password = '', name = '' } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      users.createUser(username, password, name).then((result) => {
+      db.createUser({ username, password, name }).then((result) => {
         res.status(201).json({ result });
       });
     }
@@ -113,11 +115,11 @@ POST með notendanafni og lykilorði skilar token
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  const user = await users.findByUsername(username);
+  const user = await db.findByUsername(username);
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
   }
-  const passwordIsCorrect = await users.comparePasswords(password, user.password);
+  const passwordIsCorrect = await db.comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
     const payload = { id: user.id };

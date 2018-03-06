@@ -5,7 +5,7 @@ const {
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const csv = require('csvtojson');
-
+const bcrypt = require('bcrypt');
 /**
  * Execute an SQL query.
  *
@@ -43,27 +43,13 @@ async function query(sqlQuery, values = []) {
  *
  * @returns {Promise} Promise representing the object result of registered user
  */
-async function register({
-  username,
-  password,
-  name,
-} = {}) {
-  /* todo útfæra */
-}
+async function createUser({ username, password, name } = {}) {
+  const hashedPassword = await bcrypt.hash(password, 11);
+  const q = 'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING *';
 
-/** THURFUM THETTA ORUGGLEGA EKKI GERI THETTA BARA TIL ORYGGIS
- * Login a user asynchronously.
- *
- * @param {string} username - username of user
- * @param {string} password - password of user
- *
- * @returns {Promise} Promise representing the token for login
- */
-async function login({
-  username,
-  password,
-} = {}) {
-  /* todo útfæra */
+  const result = await query(q, [username, hashedPassword, name]);
+
+  return result.rows[0];
 }
 
 /**
@@ -78,13 +64,48 @@ async function readAllUsers() {
 /**
  * Read a single user asynchronously.
  *
- * @param {number} id - Id of user
+ * @param {string} username - username of user
  *
  * @returns {Promise} Promise representing the user object or null if not found
  */
-async function readOneUser(id) {
-  /* todo útfæra */
+async function findByUsername(username) {
+  const q = 'SELECT * FROM Users WHERE username = $1';
+
+  const result = await query(q, [username]);
+  if (result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
 }
+
+/**
+ * Read a single user asynchronously
+ * 
+ * @param {number} id - id of user
+ * 
+ * 
+ * @returns {Promise} Promise representing the user object or null if not found
+ */
+
+async function findById(id) {
+  const q = 'SELECT * FROM Users WHERE id = $1';
+
+  const result = await query(q, [id]);
+
+  if (result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
+}
+
+/**
+ * 
+ * 
+ * 
+ * 
+ */
 
 /**
  * Update user asynchronously.
@@ -276,10 +297,10 @@ async function addCategories() {
 
 
 module.exports = {
-  register,
-  login,
+  createUser,
   readAllUsers,
-  readOneUser,
+  findById,
+  findByUsername,
   alterUser,
   readAllCategories,
   createCategory,

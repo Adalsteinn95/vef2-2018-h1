@@ -32,37 +32,6 @@ async function comparePasswords(hash, password) {
   return result;
 }
 
-async function findByUsername(username) {
-  const q = 'SELECT * FROM Users WHERE username = $1';
-
-  const result = await query(q, [username]);
-  if (result.rowCount === 1) {
-    return result.rows[0];
-  }
-
-  return null;
-}
-
-async function findById(id) {
-  const q = 'SELECT * FROM Users WHERE id = $1';
-
-  const result = await query(q, [id]);
-
-  if (result.rowCount === 1) {
-    return result.rows[0];
-  }
-
-  return null;
-}
-
-async function createUser(username, password, name) {
-  const hashedPassword = await bcrypt.hash(password, 11);
-  const q = 'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING *';
-
-  const result = await query(q, [username, hashedPassword, name]);
-
-  return result.rows[0];
-}
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -144,7 +113,8 @@ router.post(
 );
 
 /*
-DELETE eyðir lestri bókar fyrir innskráðan notanda*/
+DELETE eyðir lestri bókar fyrir innskráðan notanda
+*/
 
 router.delete('/users/me/read/:id', (req, res) => {
   // do stuff
@@ -153,7 +123,4 @@ router.delete('/users/me/read/:id', (req, res) => {
 module.exports = {
   router,
   comparePasswords,
-  findByUsername,
-  findById,
-  createUser,
 };
