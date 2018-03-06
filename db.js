@@ -59,6 +59,13 @@ async function createUser({ username, password, name } = {}) {
  */
 async function readAllUsers() {
   /* todo útfæra */
+
+  const queryString = 'SELECT * from Users';
+
+  const result = await query(queryString, null);
+
+  return result.rows;
+
 }
 
 /**

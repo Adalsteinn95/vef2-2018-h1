@@ -119,7 +119,7 @@ app.post('/login', async (req, res) => {
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
   }
-  const passwordIsCorrect = await db.comparePasswords(password, user.password);
+  const passwordIsCorrect = await users.comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
     const payload = { id: user.id };

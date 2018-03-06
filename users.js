@@ -1,30 +1,18 @@
 const express = require('express');
 
-const { check, validationResult } = require('express-validator/check');
+const {
+  check,
+  validationResult
+} = require('express-validator/check');
 
 const router = express.Router();
 
 const bcrypt = require('bcrypt');
-const { Client } = require('pg');
+const {
+  Client
+} = require('pg');
+const db = require('./db');
 
-const connectionString = process.env.DATABASE_URL;
-
-async function query(q, values = []) {
-  const client = new Client({ connectionString });
-  await client.connect();
-
-  let result;
-
-  try {
-    result = await client.query(q, values);
-  } catch (err) {
-    throw err;
-  } finally {
-    await client.end();
-  }
-
-  return result;
-}
 
 async function comparePasswords(hash, password) {
   const result = await bcrypt.compare(hash, password);
@@ -37,8 +25,26 @@ async function comparePasswords(hash, password) {
 GET skilar síðu (sjá að neðan) af notendum
 lykilorðs hash skal ekki vera sýnilegt
 */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // do stuff
+  const result = await db.readAllUsers();
+
+  const finalResult = result.map((i) => {
+    const {
+      id,
+      username,
+      name,
+      image,
+    } = i;
+    return {
+      id,
+      username,
+      name,
+      image,
+    };
+  });
+
+  res.send(finalResult);
 });
 
 /*
@@ -63,11 +69,13 @@ PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn,
 router.patch(
   '/me',
   check('password')
-    .isLength({ min: 6 })
-    .withMessage('Lykilorð verður að vera amk 6 stafir'),
+  .isLength({
+    min: 6
+  })
+  .withMessage('Lykilorð verður að vera amk 6 stafir'),
   check('name')
-    .isEmpty()
-    .withMessage('Nafn má ekki vera tómt'),
+  .isEmpty()
+  .withMessage('Nafn má ekki vera tómt'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -105,8 +113,11 @@ POST býr til nýjan lestur á bók og skilar
 router.post(
   '/users/me/read',
   check('rating')
-    .isInt({ min: 1, max: 5 })
-    .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
+  .isInt({
+    min: 1,
+    max: 5
+  })
+  .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   (req, res) => {
     // do stuff
   },
