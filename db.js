@@ -164,7 +164,7 @@ async function readAllCategories() {
 
 async function createCategory(name) {
   /* todo útfæra */
-  console.info(name);
+
   const queryString = 'INSERT INTO Categories(name) VALUES($1) RETURNING *';
 
   const values = [name];
@@ -240,8 +240,9 @@ async function createBook({
   /* todo útfæra */
   const queryString = 'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
 
-  if (pagecount === ' ') { pagecount = null; }
-  if (published === ' ') { published = null; }
+  console.info(pagecount);
+  if (pagecount === '') { pagecount = null; }
+  if (published === '') { published = null; }
 
   const values = [xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10), xss(published), xss(pagecount), xss(language)];
 

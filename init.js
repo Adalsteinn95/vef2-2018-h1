@@ -34,7 +34,7 @@ async function addBooks() {
 async function addCategories() {
   const csvFilePath = './data/books.csv';
   let books = [];
-  csv()
+  await csv()
     .fromFile(csvFilePath)
     .on('json', (jsonObj) => {
       books.push(jsonObj.category);
@@ -47,11 +47,5 @@ async function addCategories() {
         await db.createCategory(books[i]);
       }
     });
+  return true;
 }
-
-async function init() {
-  await addCategories();
-  await addBooks();
-}
-
-init();
