@@ -11,6 +11,7 @@ GET skilar síðu af bókum
 
 /* munum orugglegea ekki vilja hafa thetta svona */
 let OFFSET = 0;
+let OFFSETSEARCH = 0;
 
 router.get('/', async (req, res) => {
   // do stuff
@@ -22,12 +23,19 @@ router.get('/', async (req, res) => {
     const result = await db.readAllBooks(OFFSET);
 
     res.send({ LIMIT: 10, OFFSET, books: result.rows });
-
     OFFSET += 10;
+    OFFSETSEARCH = 0;
   } else {
-    const result = await db.search(search, search);
-    res.send({ LIMIT: 10, OFFSET, books: result.rows });
-    OFFSET += 10;
+    const result = await db.search(search, search, OFFSETSEARCH);
+
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
+    } else {
+      res.status(201).json({ LIMIT: 10, OFFSETSEARCH, books: result.rows });
+      OFFSETSEARCH += 10;
+      OFFSET = 0;
+    }
   }
 });
 
