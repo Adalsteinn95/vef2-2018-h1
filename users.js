@@ -1,25 +1,13 @@
 const express = require('express');
 
-const {
-  check,
-  validationResult
-} = require('express-validator/check');
+const { check, validationResult } = require('express-validator/check');
+const { requireAuthentication, passport } = require('./passport');
 
 const router = express.Router();
 
 const bcrypt = require('bcrypt');
-const {
-  Client
-} = require('pg');
+const { Client } = require('pg');
 const db = require('./db');
-
-
-async function comparePasswords(hash, password) {
-  const result = await bcrypt.compare(hash, password);
-
-  return result;
-}
-
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -31,10 +19,7 @@ router.get('/', async (req, res) => {
 
   const finalResult = result.map((i) => {
     const {
-      id,
-      username,
-      name,
-      image,
+      id, username, name, image,
     } = i;
     return {
       id,
@@ -48,17 +33,17 @@ router.get('/', async (req, res) => {
 });
 
 /*
+GET skilar innskráðum notanda (þ.e.a.s. þér)
+*/
+router.get('/me', requireAuthentication, (req, res) => {
+  res.json({ data: 'top secret', user: req.user });
+});
+
+/*
 GET skilar stökum notanda ef til
 Lykilorðs hash skal ekki vera sýnilegt
 */
 router.get('/:id', (req, res) => {
-  // do stuff
-});
-
-/*
-GET skilar innskráðum notanda (þ.e.a.s. þér)
-*/
-router.get('/me', (req, res) => {
   // do stuff
 });
 
@@ -69,13 +54,13 @@ PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn,
 router.patch(
   '/me',
   check('password')
-  .isLength({
-    min: 6
-  })
-  .withMessage('Lykilorð verður að vera amk 6 stafir'),
+    .isLength({
+      min: 6,
+    })
+    .withMessage('Lykilorð verður að vera amk 6 stafir'),
   check('name')
-  .isEmpty()
-  .withMessage('Nafn má ekki vera tómt'),
+    .isEmpty()
+    .withMessage('Nafn má ekki vera tómt'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -113,11 +98,11 @@ POST býr til nýjan lestur á bók og skilar
 router.post(
   '/users/me/read',
   check('rating')
-  .isInt({
-    min: 1,
-    max: 5
-  })
-  .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
+    .isInt({
+      min: 1,
+      max: 5,
+    })
+    .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   (req, res) => {
     // do stuff
   },
@@ -131,7 +116,4 @@ router.delete('/users/me/read/:id', (req, res) => {
   // do stuff
 });
 
-module.exports = {
-  router,
-  comparePasswords,
-};
+module.exports = router;

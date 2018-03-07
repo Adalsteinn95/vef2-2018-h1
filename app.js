@@ -1,10 +1,8 @@
-
 require('dotenv').config();
 
 const express = require('express');
 const { check, validationResult } = require('express-validator/check');
 const { Strategy, ExtractJwt } = require('passport-jwt');
-const passport = require('passport');
 
 const app = express();
 const jwt = require('jsonwebtoken');
@@ -13,45 +11,20 @@ const books = require('./books');
 const users = require('./users');
 const db = require('./db');
 
+const { requireAuthentication, getToken, passport } = require('./passport');
 
 app.use(express.json());
 
-app.use('/books', books);
-app.use('/users', users.router);
 app.use(passport.initialize());
+app.use('/books', books);
+app.use('/users', users);
 
-const {
-  PORT: port = 3000,
-  JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 20,
-} = process.env;
+// app.use(requireAuthentication());
 
-if (!jwtSecret) {
-  console.error('JWT_SECRET not registered in .env');
-  process.exit(1);
-}
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: jwtSecret,
-};
-
-function requireAuthentication(req, res, next) {
-  return passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-
-    if (!user) {
-      const error = info.name === 'TokenExpiredError' ? 'expired token' : 'invalid token';
-      return res.status(401).json({ error });
-    }
-
-    req.user = user;
-    next();
-  })(req, res, next);
-}
-
+app.get('/admin', requireAuthentication, (req, res) => {
+  console.log(req.user);
+  res.json({ data: 'top secret', user: req.user });
+});
 
 /*
 GET skilar síðu af flokkum
@@ -79,7 +52,6 @@ app.post(
     // do other stuff
   },
 );
-
 
 /*
 POST býr til notanda og skilar án lykilorðs hash
@@ -119,17 +91,15 @@ app.post('/login', async (req, res) => {
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
   }
-  const passwordIsCorrect = await users.comparePasswords(password, user.password);
+  const passwordIsCorrect = await db.comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
-    const payload = { id: user.id };
-    const tokenOptions = { expiresIn: tokenLifetime };
-    const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
+    const token = getToken(user);
+    console.log(token);
     return res.json({ token });
   }
   return res.status(401).json({ error: 'Invalid password' });
 });
-
 
 // eslint-disable-next-line
 function notFoundHandler(req, res, next) {
@@ -149,9 +119,8 @@ function errorHandler(err, req, res, next) {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-
 const { PORT: portlisten = 3000, HOST: host = '127.0.0.1' } = process.env;
 
 app.listen(portlisten, () => {
-  console.info(`Server running at http://${host}:${port}/`);
+  console.info(`Server running at http://${host}:${portlisten}/`);
 });

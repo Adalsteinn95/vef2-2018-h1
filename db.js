@@ -1,8 +1,7 @@
-const {
-  Client,
-} = require('pg');
+const { Client } = require('pg');
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
+const connectionString =
+  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -32,7 +31,6 @@ async function query(sqlQuery, values = []) {
   return result;
 }
 
-
 /**
  * register a user asynchronously.
  *
@@ -50,6 +48,12 @@ async function createUser({ username, password, name } = {}) {
   const result = await query(q, [username, hashedPassword, name]);
 
   return result.rows[0];
+}
+// VANTAR DOCS
+async function comparePasswords(hash, password) {
+  const result = await bcrypt.compare(hash, password);
+
+  return result;
 }
 
 /**
@@ -118,16 +122,14 @@ async function findById(id) {
  *
  */
 async function alterUser({
-  id,
-  username,
-  password,
-  image,
+  id, username, password, image,
 } = {}) {
   /* todo útfæra */
 
   const values = [xss(username), xss(password), xss(image), xss(id)];
 
-  const queryString = 'UPDATE users SET username = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
+  const queryString =
+    'UPDATE users SET username = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
 
   const result = await query(queryString, values);
 
@@ -238,12 +240,27 @@ async function createBook({
   language,
 } = {}) {
   /* todo útfæra */
-  const queryString = 'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+  const queryString =
+    'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
 
-  if (pagecount === ' ') { pagecount = null; }
-  if (published === ' ') { published = null; }
+  if (pagecount === ' ') {
+    pagecount = null;
+  }
+  if (published === ' ') {
+    published = null;
+  }
 
-  const values = [xss(title), xss(isbn13), xss(author), xss(description), xss(category), xss(isbn10), xss(published), xss(pagecount), xss(language)];
+  const values = [
+    xss(title),
+    xss(isbn13),
+    xss(author),
+    xss(description),
+    xss(category),
+    xss(isbn10),
+    xss(published),
+    xss(pagecount),
+    xss(language),
+  ];
 
   const result = await query(queryString, values);
 }
@@ -260,7 +277,8 @@ async function getReadBooks(userID) {
 
   const values = [xss(userID)];
 
-  const queryString = 'SELECT * from books WHERE id IN (SELECT bookid from readBooks where userid = $1)';
+  const queryString =
+    'SELECT * from books WHERE id IN (SELECT bookid from readBooks where userid = $1)';
 
   const result = await query(queryString, values);
 
@@ -284,7 +302,8 @@ async function addReadBook({
 
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
 
-  const queryString = 'INSERT into readBooks(userid, bookid, rating) VALUES ($1, $2, $3) RETURNING *';
+  const queryString =
+    'INSERT into readBooks(userid, bookid, rating) VALUES ($1, $2, $3) RETURNING *';
 
   const result = await query(queryString, values);
 
@@ -319,9 +338,10 @@ async function del(userID, bookID) {
  *
  *
  * @returns {Promise} Promise representing array of books
-*/
+ */
 async function search(title, description, offset) {
-  const queryString = 'SELECT * from Books WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($2) ORDER BY title LIMIT 10 OFFSET $3';
+  const queryString =
+    'SELECT * from Books WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($2) ORDER BY title LIMIT 10 OFFSET $3';
   const values = [xss(title), xss(description), offset];
 
   const result = query(queryString, values);
@@ -344,4 +364,5 @@ module.exports = {
   addReadBook,
   del,
   search,
+  comparePasswords,
 };
