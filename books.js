@@ -2,6 +2,7 @@ const express = require('express');
 const { check, validationResult } = require('express-validator/check');
 
 const db = require('./db');
+const { requireAuthentication, passport } = require('./passport');
 
 const router = express.Router();
 
@@ -14,7 +15,6 @@ GET skilar síðu af bókum
 
 router.get('/', async (req, res) => {
   // do stuff
-
 
   const { search , page } = req.query;
 
@@ -32,7 +32,6 @@ router.get('/', async (req, res) => {
 
   } else {
     const result = await db.search(search, search, number);
-
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
@@ -72,12 +71,11 @@ router.post(
   },
 );
 
-
 /*
 GET skilar stakri bók
 */
-router.get('/:id', (req, res) => {
-  // do stuff
+router.get('/:id', requireAuthentication, (req, res) => {
+  res.json({ data: 'top secret', user: req.user });
 });
 
 /*
