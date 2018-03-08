@@ -1,11 +1,9 @@
 const cloud = require('cloudinary');
 
-
-
 cloud.config({
-  cloud_name: process.env.CLOUDINARY_NAME || 'hckoju8k4',
-  api_key: process.env.CLOUDINARY_APIKEY || '844629566491216',
-  api_secret: process.env.CLOUDINARY_APISECRET || 'VZA0mQvL25Bn1EsjvCzUVjThyP0',
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_APIKEY,
+  api_secret: process.env.CLOUDINARY_APISECRET,
 });
 
 
@@ -15,10 +13,13 @@ async function upload(imageURL) {
   return result;
 }
 
-async function test() {
-  const a = await upload('triangles.png');
-
-  console.info(a);
+async function del(imageID) {
+  const result = await cloud.uploader.destroy(imageID);
+  return result;
 }
 
-test();
+
+module.exports = {
+  upload,
+  del,
+};
