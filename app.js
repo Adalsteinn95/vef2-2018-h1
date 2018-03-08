@@ -95,7 +95,6 @@ app.post('/login', async (req, res) => {
 
   if (passwordIsCorrect) {
     const token = getToken(user);
-    console.log(token);
     return res.json({ token });
   }
   return res.status(401).json({ error: 'Invalid password' });

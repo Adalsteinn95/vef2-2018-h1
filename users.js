@@ -29,22 +29,14 @@ router.get('/', async (req, res) => {
     };
   });
 
-  res.send(finalResult);
+  res.json({ finalResult });
 });
 
 /*
 GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
 router.get('/me', requireAuthentication, (req, res) => {
-  res.json({ data: 'top secret', user: req.user });
-});
-
-/*
-GET skilar stökum notanda ef til
-Lykilorðs hash skal ekki vera sýnilegt
-*/
-router.get('/:id', (req, res) => {
-  // do stuff
+  res.json({ user: req.user });
 });
 
 /*
@@ -61,19 +53,45 @@ router.patch(
   check('name')
     .isEmpty()
     .withMessage('Nafn má ekki vera tómt'),
-  (req, res) => {
+  requireAuthentication,
+  async (req, res) => {
+    const { id } = req.user;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // do stuff
+      const { name, password, image } = req.body;
+      await db.alterUser({
+        id,
+        name,
+        password,
+        image,
+      });
+      return res.status(204).json();
     }
-    // do other stuff
+    return res.status(404).json({ errors });
   },
 );
+/*
+GET skilar stökum notanda ef til
+Lykilorðs hash skal ekki vera sýnilegt
+*/
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const user = await db.findById(id);
+  if (user) {
+    return res.json({
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      image: user.image,
+    });
+  }
+  return res.status(404).json({ error: 'Notandi fannst ekki' });
+});
 
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
-router.get('/me/profile', (req, res) => {
+router.post('/me/profile', (req, res) => {
   // do stuff
 });
 

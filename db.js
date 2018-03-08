@@ -114,27 +114,27 @@ async function findById(id) {
  * Update user asynchronously.
  *
  * @param {number} id - Id of user to update
- * @param {string} username - new username for user
+ * @param {string} name - new name for user
  * @param {string} password - new password for user
  * @param {string} image - new image for user
  *
- * @returns {Promise} Promist representing the new version of the user object
+ * @returns {Promise} Promise representing the new version of the user object
  *
  */
 async function alterUser({
-  id, username, password, image,
+  id, name, password, image,
 } = {}) {
   /* todo útfæra */
-
-  const values = [xss(username), xss(password), xss(image), xss(id)];
+  const hashedPassword = await bcrypt.hash(password, 11);
+  const values = [xss(name), xss(hashedPassword), xss(image), xss(id)];
 
   const queryString =
-    'UPDATE users SET username = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
+    'UPDATE users SET name = $1, password = $2, image = $3 WHERE id = $4 RETURNING *';
 
   const result = await query(queryString, values);
 
   if (result.rowCount === 0) {
-    /* not found */
+    return null;
   }
 
   /* success */
