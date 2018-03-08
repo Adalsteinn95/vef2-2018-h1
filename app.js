@@ -10,9 +10,10 @@ const jwt = require('jsonwebtoken');
 const books = require('./books');
 const users = require('./users');
 const db = require('./db');
-const { catchErrors } = require('./utils');
 
 const { requireAuthentication, getToken, passport } = require('./passport');
+
+const { catchErrors } = require('./utils');
 
 app.use(express.json());
 
@@ -23,13 +24,13 @@ app.use('/users', users);
 /*
 GET skilar síðu af flokkum
 */
-function getCategories(req, res) {
+async function getCategories(req, res) {
   // do stuff
 }
 /*
 POST býr til nýjan flokk og skilar
 */
-function createCategory(req, res) {
+async function createCategory(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     // do stuff
@@ -40,15 +41,16 @@ function createCategory(req, res) {
 /*
 POST býr til notanda og skilar án lykilorðs hash
 */
-function registerUser(req, res) {
+async function registerUser(req, res) {
   const { username = '', password = '', name = '' } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    db.createUser({ username, password, name }).then((result) => {
-      res.status(201).json({ result });
-    });
+    const errorMessages = errors.array().map(i => ({ field: i.param, message: i.msg }));
+    return res.status(404).json({ errorMessages });
   }
-  // do other stuff
+  return db
+    .createUser({ username, password, name })
+    .then(result => res.status(201).json({ result }));
 }
 
 /*

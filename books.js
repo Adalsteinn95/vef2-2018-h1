@@ -3,10 +3,10 @@ const { check, validationResult } = require('express-validator/check');
 
 const db = require('./db');
 const { requireAuthentication, passport } = require('./passport');
-const { catchErrors } = require('./utils');
 
 const router = express.Router();
 
+const { catchErrors } = require('./utils');
 /*
 GET skilar síðu af bókum
 */
@@ -46,9 +46,7 @@ function createBook(req, res) {
 /*
 GET skilar stakri bók
 */
-function getBookById(req, res) {
-  res.json({ data: 'top secret', user: req.user });
-}
+function getBookById(req, res) {}
 
 /*
 PATCH uppfærir bók

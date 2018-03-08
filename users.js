@@ -8,7 +8,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { Client } = require('pg');
 const db = require('./db');
+
 const { catchErrors } = require('./utils');
+
 /*
 GET skilar síðu (sjá að neðan) af notendum
 lykilorðs hash skal ekki vera sýnilegt
@@ -16,7 +18,9 @@ lykilorðs hash skal ekki vera sýnilegt
 
 async function getUsers(req, res) {
   const result = await db.readAllUsers();
-
+  if (result.length === 0) {
+    res.status(204).json();
+  }
   const finalResult = result.map((i) => {
     const {
       id, username, name, image,
