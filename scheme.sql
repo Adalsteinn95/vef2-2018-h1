@@ -19,8 +19,8 @@ CREATE TABLE Books (
     description  text,
     category     text,
     ISBN10       VARCHAR(10),
-    published    timestamp,
-    pagecount    integer,
+    published    text,
+    pagecount    text,
     language     VARCHAR(2),
     FOREIGN KEY (category) REFERENCES Categories (name)
 );

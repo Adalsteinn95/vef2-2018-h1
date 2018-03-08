@@ -7,10 +7,10 @@ const csv = require('csvtojson');
  * @returns {boolean}
  *
  */
-async function addBooks() {
+async function addBooks(result) {
   const csvFilePath = './data/books.csv';
   const books = [];
-  csv()
+  const b = await csv()
     .fromFile(csvFilePath)
     .on('json', (jsonObj) => {
       books.push(jsonObj);
@@ -21,7 +21,11 @@ async function addBooks() {
         // eslint-disable-next-line
         await db.createBook(books[i]);
       }
+
+      return true;
     });
+
+  return b;
 }
 
 
@@ -34,7 +38,7 @@ async function addBooks() {
 async function addCategories() {
   const csvFilePath = './data/books.csv';
   let books = [];
-  csv()
+  const a = await csv()
     .fromFile(csvFilePath)
     .on('json', (jsonObj) => {
       books.push(jsonObj.category);
@@ -46,12 +50,18 @@ async function addCategories() {
         // eslint-disable-next-line
         await db.createCategory(books[i]);
       }
+      
+      return books;
     });
+
+  return a;
 }
 
 async function init() {
-  await addCategories();
-  await addBooks();
+  addCategories();
+
+  setTimeout(addBooks, 100);
 }
+
 
 init();
