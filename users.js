@@ -16,14 +16,18 @@ const multer  = require('multer');
 const upload = multer({ dest: 'data/uploads/' });
  
 
+const { catchErrors } = require('./utils');
+
 /*
 GET skilar síðu (sjá að neðan) af notendum
 lykilorðs hash skal ekki vera sýnilegt
 */
-router.get('/', async (req, res) => {
-  // do stuff
-  const result = await db.readAllUsers();
 
+async function getUsers(req, res) {
+  const result = await db.readAllUsers();
+  if (result.length === 0) {
+    res.status(204).json();
+  }
   const finalResult = result.map((i) => {
     const {
       id, username, name, image,
@@ -37,51 +41,40 @@ router.get('/', async (req, res) => {
   });
 
   res.json({ finalResult });
-});
+}
 
 /*
 GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
-router.get('/me', requireAuthentication, (req, res) => {
+function getMe(req, res) {
   res.json({ user: req.user });
-});
+}
 
 /*
 PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn,
 þ.e.a.s. nafn eða lykilorð, ef þau eru gild
 */
-router.patch(
-  '/me',
-  check('password')
-    .isLength({
-      min: 6,
-    })
-    .withMessage('Lykilorð verður að vera amk 6 stafir'),
-  check('name')
-    .isEmpty()
-    .withMessage('Nafn má ekki vera tómt'),
-  requireAuthentication,
-  async (req, res) => {
-    const { id } = req.user;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const { name, password, image } = req.body;
-      await db.alterUser({
-        id,
-        name,
-        password,
-        image,
-      });
-      return res.status(204).json();
-    }
-    return res.status(404).json({ errors });
-  },
-);
+async function patchUser(req, res) {
+  const { id } = req.user;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const { name, password, image } = req.body;
+    await db.alterUser({
+      id,
+      name,
+      password,
+      image,
+    });
+    return res.status(204).json();
+  }
+  return res.status(404).json({ errors });
+}
+
 /*
 GET skilar stökum notanda ef til
 Lykilorðs hash skal ekki vera sýnilegt
 */
-router.get('/:id', async (req, res) => {
+async function getUserById(req, res) {
   const { id } = req.params;
   const user = await db.findById(id);
   if (user) {
@@ -93,7 +86,7 @@ router.get('/:id', async (req, res) => {
     });
   }
   return res.status(404).json({ error: 'Notandi fannst ekki' });
-});
+}
 
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
@@ -108,21 +101,50 @@ router.post('/me/profile', upload.single('image'), async (req, res) => {
 /*
 GET skilar síðu af lesnum bókum notanda
 */
-router.get('/users/:id/read', (req, res) => {
+function getReadBooks(req, res) {
   // do stuff
-});
+}
 
 /*
 GET skilar síðu af lesnum bókum innskráðs notanda
 */
-router.get('/users/me/read', (req, res) => {
+function getMyReadBooks(req, res) {
   // do stuff
-});
+}
 
 /*
 POST býr til nýjan lestur á bók og skilar
 */
+function newReadBook(req, res) {
+  // do stuff
+}
 
+/*
+DELETE eyðir lestri bókar fyrir innskráðan notanda
+*/
+function deleteReadBook(req, res) {
+  // do stuff
+}
+
+router.get('/', catchErrors(getUsers));
+router.get('/me', requireAuthentication, catchErrors(getMe));
+router.patch(
+  '/me',
+  check('password')
+    .isLength({
+      min: 6,
+    })
+    .withMessage('Lykilorð verður að vera amk 6 stafir'),
+  check('name')
+    .isEmpty()
+    .withMessage('Nafn má ekki vera tómt'),
+  requireAuthentication,
+  catchErrors(patchUser),
+);
+router.get('/:id', catchErrors(getUserById));
+router.post('/me/profile', catchErrors(setPhoto));
+router.get('/users/:id/read', catchErrors(getReadBooks));
+router.get('/users/me/read', catchErrors(getMyReadBooks));
 router.post(
   '/users/me/read',
   check('rating')
@@ -131,17 +153,8 @@ router.post(
       max: 5,
     })
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
-  (req, res) => {
-    // do stuff
-  },
+  catchErrors(newReadBook),
 );
-
-/*
-DELETE eyðir lestri bókar fyrir innskráðan notanda
-*/
-
-router.delete('/users/me/read/:id', (req, res) => {
-  // do stuff
-});
+router.delete('/users/me/read/:id', catchErrors(deleteReadBook));
 
 module.exports = router;
