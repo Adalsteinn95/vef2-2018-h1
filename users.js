@@ -10,11 +10,10 @@ const { Client } = require('pg');
 const db = require('./db');
 const cloud = require('./cloud');
 
-/* image */ 
-const multer  = require('multer');
+/* image */
+const multer = require('multer');
 
-const upload = multer({ dest: 'data/uploads/' });
- 
+const upload = multer({ });
 
 const { catchErrors } = require('./utils');
 
@@ -93,7 +92,8 @@ POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar sló
 */
 router.post('/me/profile', upload.single('image'), async (req, res) => {
   // do stuff
-  const result = await cloud.upload(req.file.path);
+  const result = await cloud.upload(req.file.buffer);
+
 
   res.send({ result });
 });
