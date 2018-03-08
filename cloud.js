@@ -7,9 +7,9 @@ cloud.config({
 });
 
 
-async function upload(imageURL) {
-
-  const result = await cloud.uploader.upload(imageURL);
+async function upload(imageBuffer) {
+  imageBuffer = imageBuffer.toString('base64');
+  const result = await cloud.uploader.upload(`data:image/gif;base64,${imageBuffer}`);
 
   return result;
 }
