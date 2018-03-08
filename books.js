@@ -24,6 +24,7 @@ router.get('/', async (req, res) => {
   for (let i = 0; i < pages; i++) {
     number += 10;
   }
+  
   if (search === '' || search === undefined) {
 
     const result = await db.readAllBooks(number);
