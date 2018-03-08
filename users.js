@@ -8,6 +8,13 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { Client } = require('pg');
 const db = require('./db');
+const cloud = require('./cloud');
+
+/* image */ 
+const multer  = require('multer');
+
+const upload = multer({ dest: 'data/uploads/' });
+ 
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -91,8 +98,11 @@ router.get('/:id', async (req, res) => {
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
-router.post('/me/profile', (req, res) => {
+router.post('/me/profile', upload.single('image'), async (req, res) => {
   // do stuff
+  const result = await cloud.upload(req.file.path);
+
+  res.send({ result });
 });
 
 /*
