@@ -13,78 +13,50 @@ const db = require('./db');
 
 const { requireAuthentication, getToken, passport } = require('./passport');
 
+const { catchErrors } = require('./utils');
+
 app.use(express.json());
 
 app.use(passport.initialize());
 app.use('/books', books);
 app.use('/users', users);
 
-// app.use(requireAuthentication());
-
-app.get('/admin', requireAuthentication, (req, res) => {
-  console.log(req.user);
-  res.json({ data: 'top secret', user: req.user });
-});
-
 /*
 GET skilar síðu af flokkum
 */
-app.get('/categories', (req, res) => {
-  // færa kannski categories í books?
+async function getCategories(req, res) {
   // do stuff
-});
-
+}
 /*
 POST býr til nýjan flokk og skilar
 */
-
-app.post(
-  '/categories',
-  check('name')
-    .isEmpty()
-    .withMessage('Nafn á flokki má ekki vera tómt'),
-
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // do stuff
-    }
-    // do other stuff
-  },
-);
+async function createCategory(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // do stuff
+  }
+  // do other stuff
+}
 
 /*
 POST býr til notanda og skilar án lykilorðs hash
 */
-
-app.post(
-  '/register',
-  check('username')
-    .isLength({ min: 3 })
-    .withMessage('Notendanafn verður að vera amk 3 stafir'),
-  check('password')
-    .isLength({ min: 6 })
-    .withMessage('Lykilorð verður að vera amk 6 stafir'),
-  check('name')
-    .isEmpty()
-    .withMessage('Nafn má ekki vera tómt'),
-  (req, res) => {
-    const { username = '', password = '', name = '' } = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      db.createUser({ username, password, name }).then((result) => {
-        res.status(201).json({ result });
-      });
-    }
-    // do other stuff
-  },
-);
+async function registerUser(req, res) {
+  const { username = '', password = '', name = '' } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map(i => ({ field: i.param, message: i.msg }));
+    return res.status(404).json({ errorMessages });
+  }
+  return db
+    .createUser({ username, password, name })
+    .then(result => res.status(201).json({ result }));
+}
 
 /*
 POST með notendanafni og lykilorði skilar token
 */
-
-app.post('/login', async (req, res) => {
+async function loginUser(req, res) {
   const { username, password } = req.body;
 
   const user = await db.findByUsername(username);
@@ -98,7 +70,30 @@ app.post('/login', async (req, res) => {
     return res.json({ token });
   }
   return res.status(401).json({ error: 'Invalid password' });
-});
+}
+
+app.get('/categories', catchErrors(getCategories));
+app.post(
+  '/categories',
+  check('name')
+    .isEmpty()
+    .withMessage('Nafn á flokki má ekki vera tómt'),
+  catchErrors(createCategory),
+);
+app.post(
+  '/register',
+  check('username')
+    .isLength({ min: 3 })
+    .withMessage('Notendanafn verður að vera amk 3 stafir'),
+  check('password')
+    .isLength({ min: 6 })
+    .withMessage('Lykilorð verður að vera amk 6 stafir'),
+  check('name')
+    .isEmpty()
+    .withMessage('Nafn má ekki vera tómt'),
+  catchErrors(registerUser),
+);
+app.post('/login', catchErrors(loginUser));
 
 // eslint-disable-next-line
 function notFoundHandler(req, res, next) {
