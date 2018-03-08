@@ -8,6 +8,13 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { Client } = require('pg');
 const db = require('./db');
+const cloud = require('./cloud');
+
+/* image */ 
+const multer  = require('multer');
+
+const upload = multer({ dest: 'data/uploads/' });
+ 
 
 const { catchErrors } = require('./utils');
 
@@ -84,9 +91,13 @@ async function getUserById(req, res) {
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
-function setPhoto(req, res) {
+router.post('/me/profile', upload.single('image'), async (req, res) => {
   // do stuff
-}
+  const result = await cloud.upload(req.file.path);
+
+  res.send({ result });
+});
+
 /*
 GET skilar síðu af lesnum bókum notanda
 */
