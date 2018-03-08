@@ -11,29 +11,33 @@ GET skilar síðu af bókum
 */
 
 /* munum orugglegea ekki vilja hafa thetta svona */
-let OFFSET = 0;
-let OFFSETSEARCH = 0;
+
 
 router.get('/', async (req, res) => {
   // do stuff
 
-  const { search } = req.query;
+  const { search , page } = req.query;
 
+  const pages = parseInt(page, 10);
+
+  let number = 0;
+  for (let i = 0; i < pages; i++) {
+    number += 10;
+  }
   if (search === '' || search === undefined) {
-    const result = await db.readAllBooks(OFFSET);
 
-    res.send({ LIMIT: 10, OFFSET, books: result.rows });
-    OFFSET += 10;
-    OFFSETSEARCH = 0;
+    const result = await db.readAllBooks(number);
+
+    res.send({ LIMIT: 10,number , books: result.rows });
+
   } else {
-    const result = await db.search(search, search, OFFSETSEARCH);
+    const result = await db.search(search, search, number);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
     } else {
-      res.status(201).json({ LIMIT: 10, OFFSETSEARCH, books: result.rows });
-      OFFSETSEARCH += 10;
-      OFFSET = 0;
+      res.status(201).json({ LIMIT: 10, number, books: result.rows });
+
     }
   }
 });
