@@ -115,8 +115,16 @@ function getMyReadBooks(req, res) {
 /*
 POST býr til nýjan lestur á bók og skilar
 */
+
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 function newReadBook(req, res) {
   // do stuff
+
+  return 'hallo';
 }
 
 /*
@@ -142,7 +150,7 @@ router.patch(
   catchErrors(patchUser),
 );
 router.get('/:id', catchErrors(getUserById));
-router.post('/me/profile', catchErrors(setPhoto));
+//router.post('/me/profile', catchErrors(setPhoto));
 router.get('/users/:id/read', catchErrors(getReadBooks));
 router.get('/users/me/read', catchErrors(getMyReadBooks));
 router.post(
