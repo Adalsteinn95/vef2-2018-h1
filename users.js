@@ -92,9 +92,14 @@ POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar sló
 */
 router.post('/me/profile', upload.single('image'), async (req, res) => {
   // do stuff
-  const result = await cloud.upload(req.file.buffer);
+  
 
+  const { file: { buffer } = {} } = req;
 
+  if (!buffer) {
+    return res.send('BIG error');
+  }
+  const result = await cloud.upload(buffer);
   res.send({ result });
 });
 
@@ -116,11 +121,6 @@ function getMyReadBooks(req, res) {
 POST býr til nýjan lestur á bók og skilar
 */
 
-/**
- * 
- * @param {*} req 
- * @param {*} res 
- */
 function newReadBook(req, res) {
   // do stuff
 

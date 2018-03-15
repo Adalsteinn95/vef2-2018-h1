@@ -262,8 +262,9 @@ async function createBook({
     pages,
     xss(language),
   ];
-  console.info(values);
-  await query(queryString, values);
+  const result = await query(queryString, values);
+
+  return result;
 }
 
 /**
@@ -283,7 +284,7 @@ async function getReadBooks(userID) {
 
   const result = await query(queryString, values);
 
-  return result.rows;
+  return result;
 }
 
 /**
