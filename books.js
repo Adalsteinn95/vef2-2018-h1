@@ -34,17 +34,18 @@ GET skilar síðu af bókum
 async function getAllBooks(req, res) {
   const { search, offset } = req.query;
 
+  const offsets = parseInt(offset, 10);
+
   if (search === '' || search === undefined) {
     const result = await db.getAllBooks(offset);
-
-    res.send({ LIMIT: 10, offset, books: result.rows });
+    res.send({ LIMIT: 10, offsets, books: result.rows });
   } else {
-    const result = await db.search(search, search, offset);
+    const result = await db.search(search, search, offsets);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
     } else {
-      res.status(201).json({ LIMIT: 10, offset, books: result.rows });
+      res.status(201).json({ LIMIT: 10, offsets, books: result.rows });
     }
   }
 }
