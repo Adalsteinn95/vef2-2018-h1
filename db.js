@@ -1,9 +1,6 @@
-const {
-  Client
-} = require('pg');
+const { Client } = require('pg');
 
-const connectionString =
-  const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -17,12 +14,11 @@ const xss = require('xss');
  */
 async function query(sqlQuery, values = []) {
   const client = new Client({
-    connectionString
+    connectionString,
   });
   await client.connect();
 
   let result;
-
 
   try {
     result = await client.query(sqlQuery, values);
@@ -47,11 +43,7 @@ async function query(sqlQuery, values = []) {
  *
  * @returns {Promise} Promise representing the object result of registered user
  */
-async function createUser({
-  username,
-  password,
-  name
-} = {}) {
+async function createUser({ username, password, name } = {}) {
   const hashedPassword = await bcrypt.hash(password, 11);
   const q = 'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING *';
 
@@ -132,10 +124,7 @@ async function findById(id) {
  *
  */
 async function alterUser({
-  id,
-  name,
-  password,
-  image,
+  id, name, password, image,
 } = {}) {
   /* todo útfæra */
   const hashedPassword = await bcrypt.hash(password, 11);
@@ -241,24 +230,19 @@ async function getOneBook(id) {
  *
  * @returns {Promise} Promise representing the object result of updating the book
  */
-async function alterBook({
-  title,
-  isbn10,
-  isbn13,
-  author,
-  description,
-  category,
-  published,
-  pagecount,
-  language,
-} = {}) {
+async function alterBook(
+  id,
+  {
+    title, isbn10, isbn13, author, description, category, published, pagecount, language,
+  } = {},
+) {
   const queryString =
-    'UPDATE Books SET title = $1, ISBN13 = $2, author = $3, description = $4, category, = $5, ISBN10 = $6, published = $7, pagecount = $8, language = $9 WHERE id = $4 RETURNING *';
+    'UPDATE Books SET title = $1, ISBN13 = $2, author = $3, description = $4, category = $5, ISBN10 = $6, published = $7, pagecount = $8, language = $9 WHERE id = $10 RETURNING *';
 
   let pages = parseInt(xss(pagecount), 10);
 
   if (Number.isNaN(pages)) {
-    pages = 0;
+    pages = null;
   }
   const values = [
     xss(title),
@@ -270,6 +254,7 @@ async function alterBook({
     xss(published),
     pages,
     xss(language),
+    id,
   ];
   const result = await query(queryString, values);
 
@@ -312,7 +297,6 @@ async function createBook({
   /* todo útfæra */
   const queryString =
     'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
-
 
   let pages = parseInt(xss(pagecount), 10);
 
@@ -366,10 +350,7 @@ async function getReadBooks(userID) {
  * @returns {Promise}  Promise representing of book
  */
 async function addReadBook({
-  userID,
-  bookID,
-  rating,
-  ratingtext,
+  userID, bookID, rating, ratingtext,
 } = {}) {
   /* to do */
 
