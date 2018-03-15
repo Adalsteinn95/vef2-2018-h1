@@ -13,25 +13,21 @@ GET skilar síðu af bókum
 
 /* munum orugglegea ekki vilja hafa thetta svona */
 async function getAllBooks(req, res) {
-  const { search, page } = req.query;
+  const { search, offset } = req.query;
 
-  const pages = parseInt(page, 10);
+  const offsets = parseInt(offset, 10);
 
-  let number = 0;
-  for (let i = 0; i < pages; i += 1) {
-    number += 10;
-  }
   if (search === '' || search === undefined) {
-    const result = await db.readAllBooks(number);
+    const result = await db.readAllBooks(offsets);
 
-    res.send({ LIMIT: 10, number, books: result.rows });
+    res.send({ LIMIT: 10, offsets, books: result.rows });
   } else {
-    const result = await db.search(search, search, number);
+    const result = await db.search(search, search, offsets);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
     } else {
-      res.status(201).json({ LIMIT: 10, number, books: result.rows });
+      res.status(201).json({ LIMIT: 10, offsets, books: result.rows });
     }
   }
 }
