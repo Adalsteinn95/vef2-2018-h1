@@ -3,7 +3,7 @@ const {
 } = require('pg');
 
 const connectionString =
-  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
+  const connectionString = process.env.DATABASE_URL;
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
