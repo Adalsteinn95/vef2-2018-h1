@@ -13,7 +13,7 @@ const cloud = require('./cloud');
 /* image */
 const multer = require('multer');
 
-const upload = multer({ });
+const upload = multer({});
 
 const { catchErrors } = require('./utils');
 
@@ -57,12 +57,11 @@ async function patchUser(req, res) {
   const { id } = req.user;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const { name, password, image } = req.body;
+    const { name, password } = req.body;
     await db.alterUser({
       id,
       name,
       password,
-      image,
     });
     return res.status(204).json();
   }
@@ -92,7 +91,6 @@ POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar sló
 */
 router.post('/me/profile', upload.single('image'), async (req, res) => {
   // do stuff
-  
 
   const { file: { buffer } = {} } = req;
 
@@ -150,7 +148,7 @@ router.patch(
   catchErrors(patchUser),
 );
 router.get('/:id', catchErrors(getUserById));
-//router.post('/me/profile', catchErrors(setPhoto));
+// router.post('/me/profile', catchErrors(setPhoto));
 router.get('/users/:id/read', catchErrors(getReadBooks));
 router.get('/users/me/read', catchErrors(getMyReadBooks));
 router.post(
