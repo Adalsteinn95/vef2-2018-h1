@@ -28,7 +28,6 @@ async function getAllBooks(req, res) {
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Úps þetta er vandræðalegt EKKERT FANNST!' });
     } else {
-
       res.status(201).json({ LIMIT: 10, offsets, books: result.rows });
     }
   }

@@ -2,8 +2,7 @@ const {
   Client
 } = require('pg');
 
-const connectionString =
-  const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
