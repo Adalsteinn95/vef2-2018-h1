@@ -1,7 +1,9 @@
-const { Client } = require('pg');
+const {
+  Client
+} = require('pg');
 
 const connectionString =
-  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
+  const connectionString = process.env.DATABASE_URL;
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -14,7 +16,9 @@ const xss = require('xss');
  * @returns {Promise} Promise representing the result of the SQL query
  */
 async function query(sqlQuery, values = []) {
-  const client = new Client({ connectionString });
+  const client = new Client({
+    connectionString
+  });
   await client.connect();
 
   let result;
@@ -43,7 +47,11 @@ async function query(sqlQuery, values = []) {
  *
  * @returns {Promise} Promise representing the object result of registered user
  */
-async function createUser({ username, password, name } = {}) {
+async function createUser({
+  username,
+  password,
+  name
+} = {}) {
   const hashedPassword = await bcrypt.hash(password, 11);
   const q = 'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING *';
 
@@ -124,7 +132,10 @@ async function findById(id) {
  *
  */
 async function alterUser({
-  id, name, password, image,
+  id,
+  name,
+  password,
+  image,
 } = {}) {
   /* todo útfæra */
   const hashedPassword = await bcrypt.hash(password, 11);
@@ -185,7 +196,7 @@ async function createCategory(name) {
  *
  * @returns {Promise} Promise representing an array of all Books object
  */
-async function readAllBooks(offset) {
+async function getAllBooks(offset) {
   /* todo útfæra */
 
   const queryString = 'SELECT * from Books ORDER BY title LIMIT 10 OFFSET $1';
@@ -202,7 +213,7 @@ async function readAllBooks(offset) {
  *
  * @returns {Promise} Promise representing the book object or null if not found
  */
-async function readOneBook(id) {
+async function getOneBook(id) {
   /* todo útfæra */
 
   const queryString = 'SELECT * from books WHERE id = $1';
@@ -211,6 +222,63 @@ async function readOneBook(id) {
   const result = query(queryString, values);
 
   return result;
+}
+
+/**
+ * update a book asynchronously.
+ *
+ * @param {Object} book - book to update
+ *
+ * @param {string} book.title - Title of book
+ * @param {string} book.isbn10 - ISBN10 of book
+ * @param {string} book.isbn13 - ISBN10 of book
+ * @param {string} book.author - Author of book
+ * @param {string} book.description - description of book
+ * @param {string} book.category - category of book
+ * @param {date}   book.date - date of book
+ * @param {number} book.pagecount - number of pages in book
+ * @param {string} book.language - language of book
+ *
+ * @returns {Promise} Promise representing the object result of updating the book
+ */
+async function alterBook({
+  title,
+  isbn10,
+  isbn13,
+  author,
+  description,
+  category,
+  published,
+  pagecount,
+  language,
+} = {}) {
+  const queryString =
+    'UPDATE Books SET title = $1, ISBN13 = $2, author = $3, description = $4, category, = $5, ISBN10 = $6, published = $7, pagecount = $8, language = $9 WHERE id = $4 RETURNING *';
+
+  let pages = parseInt(xss(pagecount), 10);
+
+  if (Number.isNaN(pages)) {
+    pages = 0;
+  }
+  const values = [
+    xss(title),
+    xss(isbn13),
+    xss(author),
+    xss(description),
+    xss(category),
+    xss(isbn10),
+    xss(published),
+    pages,
+    xss(language),
+  ];
+  const result = await query(queryString, values);
+
+  if (result.rowCount === 0) {
+    return null;
+  }
+
+  /* success */
+  return result.rows[0];
 }
 
 /**
@@ -298,7 +366,10 @@ async function getReadBooks(userID) {
  * @returns {Promise}  Promise representing of book
  */
 async function addReadBook({
-  userID, bookID, rating, ratingtext,
+  userID,
+  bookID,
+  rating,
+  ratingtext,
 } = {}) {
   /* to do */
 
@@ -359,12 +430,13 @@ module.exports = {
   alterUser,
   readAllCategories,
   createCategory,
-  readAllBooks,
-  readOneBook,
+  getAllBooks,
+  getOneBook,
   createBook,
   getReadBooks,
   addReadBook,
   del,
   search,
   comparePasswords,
+  alterBook,
 };
