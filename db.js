@@ -256,6 +256,8 @@ async function createBook({
   ];
 
   const result = await query(queryString, values);
+
+  return result;
 }
 
 /**
@@ -275,7 +277,7 @@ async function getReadBooks(userID) {
 
   const result = await query(queryString, values);
 
-  return result.rows;
+  return result;
 }
 
 /**
