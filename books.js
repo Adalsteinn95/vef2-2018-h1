@@ -8,6 +8,24 @@ const router = express.Router();
 
 const { catchErrors } = require('./utils');
 
+const bookValidation = [
+  check('title')
+    .isLength({ min: 1 })
+    .withMessage('Titill bókar má ekki vera tómur'),
+  check('isbn13')
+    .isISBN(13)
+    .withMessage('ISBN 13 er ekki á réttu formi'),
+  check('isbn10')
+    .isISBN(10)
+    .withMessage('ISBN 10 er ekki á réttu formi'),
+  check('pagecount')
+    .isInt({ min: 0 })
+    .withMessage('Blaðsíðufjöldi verður að vera tala, stærri en 0'),
+  check('language')
+    .isLength({ min: 2, max: 2 })
+    .withMessage('Tungumál verður að vera tveggja stafa strengur'),
+];
+
 /*
 GET skilar síðu af bókum
 */
@@ -19,8 +37,7 @@ async function getAllBooks(req, res) {
   const offsets = parseInt(offset, 10);
 
   if (search === '' || search === undefined) {
-    const result = await db.readAllBooks(offsets);
-
+    const result = await db.getAllBooks(offset);
     res.send({ LIMIT: 10, offsets, books: result.rows });
   } else {
     const result = await db.search(search, search, offsets);
@@ -43,7 +60,6 @@ async function createBook(req, res) {
     const result = await db.createBook(req.body);
     return res.status(204).json();
   }
-  // console.log('ping');
   const errors = validation.array();
   return res.status(404).json({ errors });
 }
@@ -65,29 +81,19 @@ async function getBookById(req, res) {
 /*
 PATCH uppfærir bók
 */
-function patchBook(req, res) {
-  // do stuff
+async function patchBook(req, res) {
+  const { id } = req.params;
+  const validation = validationResult(req);
+
+  if (validation.isEmpty()) {
+    const result = await db.alterBook(id, req.body);
+    return res.status(200).json(result);
+  }
+  const errors = validation.array();
+  return res.status(404).json({ errors });
 }
 
-router.post(
-  '/',
-  check('title')
-    .isLength({ min: 1 })
-    .withMessage('Titill bókar má ekki vera tómur'),
-  check('isbn13')
-    .isISBN(13)
-    .withMessage('ISBN 13 er ekki á réttu formi'),
-  check('isbn10')
-    .isISBN(10)
-    .withMessage('ISBN 10 er ekki á réttu formi'),
-  check('pagecount')
-    .isInt({ min: 0 })
-    .withMessage('Blaðsíðufjöldi verður að vera tala, stærri en 0'),
-  check('language')
-    .isLength({ min: 2, max: 2 })
-    .withMessage('Tungumál verður að vera tveggja stafa strengur'),
-  catchErrors(createBook),
-);
+router.post('/', bookValidation, catchErrors(createBook));
 router.get('/', catchErrors(getAllBooks));
 router.get(
   '/:id',
@@ -98,6 +104,7 @@ router.get(
 );
 router.patch(
   '/:id',
+  bookValidation,
   check('id')
     .isInt()
     .withMessage('Id þarf að vera tala'),
