@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 
 const connectionString =
-  process.env.DATABASE_URL;
+  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
