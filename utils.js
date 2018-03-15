@@ -1,4 +1,3 @@
-
 /**
  * higher order error function to catch errors
  *

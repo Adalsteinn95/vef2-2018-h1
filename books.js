@@ -7,6 +7,7 @@ const { requireAuthentication, passport } = require('./passport');
 const router = express.Router();
 
 const { catchErrors } = require('./utils');
+
 /*
 GET skilar síðu af bókum
 */
@@ -39,8 +40,17 @@ async function getAllBooks(req, res) {
 /*
 POST býr til nýja bók ef hún er gild og skilar
 */
-function createBook(req, res) {
-  // do stuff
+async function createBook(req, res) {
+  const validation = validationResult(req);
+
+  if (validation.isEmpty()) {
+    const result = await db.createBook(req.body);
+    console.log(result);
+    return res.status(204).json();
+  }
+  // console.log('ping');
+  const errors = validation.array();
+  return res.status(404).json({ errors });
 }
 
 /*
@@ -55,19 +65,18 @@ function patchBook(req, res) {
   // do stuff
 }
 
-router.get('/', catchErrors(getAllBooks));
 router.post(
   '/',
   check('title')
-    .isEmpty()
+    .isLength({ min: 1 })
     .withMessage('Titill bókar má ekki vera tómur'),
-  check('ISBN13')
-    .isISBN({ version: 13 })
+  check('isbn13')
+    .isISBN(13)
     .withMessage('ISBN 13 er ekki á réttu formi'),
-  check('ISBN10')
-    .isISBN({ version: 10 })
+  check('isbn10')
+    .isISBN(10)
     .withMessage('ISBN 10 er ekki á réttu formi'),
-  check('pages')
+  check('pagecount')
     .isInt({ min: 0 })
     .withMessage('Blaðsíðufjöldi verður að vera tala, stærri en 0'),
   check('language')
@@ -75,6 +84,7 @@ router.post(
     .withMessage('Tungumál verður að vera tveggja stafa strengur'),
   catchErrors(createBook),
 );
+router.get('/', catchErrors(getAllBooks));
 router.get('/:id', requireAuthentication, catchErrors(getBookById));
 router.patch('/:id', catchErrors(patchBook));
 module.exports = router;
