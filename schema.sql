@@ -1,8 +1,15 @@
+drop table readBooks;
+drop table books;
+drop table categories;
+drop table users;
+
+
+
 CREATE TABLE Users (
     id           serial PRIMARY KEY,
-    username      VARCHAR(64) UNIQUE NOT NULL,
-    password     VARCHAR(64) NOT NULL,
-    name         VARCHAR(64) NOT NULL,
+    username     text NOT NULL UNIQUE CHECK (char_length(username) > 2),
+    password     text NOT NULL CHECK (char_length(password) > 5),
+    name         text NOT NULL CHECK (username <> ''),
     image        VARCHAR(64)
 );
 
@@ -13,25 +20,23 @@ CREATE TABLE Categories (
 
 CREATE TABLE Books (
     id           serial PRIMARY KEY,
-    title        text UNIQUE NOT NULL,
+    title        text UNIQUE NOT NULL CHECK (title <> ''),
     ISBN13       VARCHAR(13) UNIQUE NOT NULL,
     author       text,
     description  text,
-    category     text,
+    category     text NOT NULL,
     ISBN10       VARCHAR(10),
     published    text,
-    pagecount    text,
+    pagecount    integer CHECK (pagecount > -1),
     language     VARCHAR(2),
     FOREIGN KEY (category) REFERENCES Categories (name)
 );
 
 CREATE TABLE readBooks(
-    id           serial PRIMARY KEY,
+    id           serial ,
     userID       serial REFERENCES Users(id),
     bookID       serial REFERENCES Books(id),
-    rating       int    NOT NULL,
-    ratingtext   VARCHAR(128),
-    unique (userID, bookID)
-
+    rating       INTEGER    NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    ratingtext   text
 );
 
