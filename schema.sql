@@ -27,7 +27,7 @@ CREATE TABLE Books (
     category     text NOT NULL,
     ISBN10       VARCHAR(10),
     published    text,
-    pagecount    integer CHECK (pagecount > 0),
+    pagecount    integer CHECK (pagecount > -1),
     language     VARCHAR(2),
     FOREIGN KEY (category) REFERENCES Categories (name)
 );

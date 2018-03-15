@@ -19,6 +19,9 @@ async function addBooks(result) {
       /* ugly but it needs to like this we only got 100 connections to server */
       for (let i = 0; i < books.length; i += 1) {
         // eslint-disable-next-line
+        if(isNaN(parseInt(books[i].pagecount,10))){
+          books[i].pagecount = 0;
+        };
         await db.createBook(books[i]);
       }
 
@@ -50,7 +53,6 @@ async function addCategories() {
         // eslint-disable-next-line
         await db.createCategory(books[i]);
       }
-      
       return books;
     });
 
@@ -60,7 +62,7 @@ async function addCategories() {
 async function init() {
   addCategories();
 
-  setTimeout(addBooks, 100);
+  setTimeout(addBooks, 1000);
 }
 
 
