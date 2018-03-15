@@ -1,7 +1,6 @@
 const { Client } = require('pg');
 
-const connectionString =
-  process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -200,7 +199,7 @@ async function readAllBooks(offset) {
  *
  * @returns {Promise} Promise representing the book object or null if not found
  */
-async function readOneBook(id) {
+async function getOneBook(id) {
   /* todo útfæra */
 
   const queryString = 'SELECT * from books WHERE id = $1';
@@ -353,7 +352,7 @@ module.exports = {
   readAllCategories,
   createCategory,
   readAllBooks,
-  readOneBook,
+  getOneBook,
   createBook,
   getReadBooks,
   addReadBook,

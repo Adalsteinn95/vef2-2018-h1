@@ -45,7 +45,6 @@ async function createBook(req, res) {
 
   if (validation.isEmpty()) {
     const result = await db.createBook(req.body);
-    console.log(result);
     return res.status(204).json();
   }
   // console.log('ping');
@@ -56,8 +55,17 @@ async function createBook(req, res) {
 /*
 GET skilar stakri bók
 */
-function getBookById(req, res) {}
-
+async function getBookById(req, res) {
+  const { id } = req.params;
+  const validation = validationResult(req);
+  if (validation.isEmpty()) {
+    const result = await db.getOneBook(id);
+    const book = result.rows[0];
+    return res.status(200).json(book);
+  }
+  const error = validation.array()[0].msg;
+  return res.status(404).json({ error });
+}
 /*
 PATCH uppfærir bók
 */
@@ -85,6 +93,18 @@ router.post(
   catchErrors(createBook),
 );
 router.get('/', catchErrors(getAllBooks));
-router.get('/:id', requireAuthentication, catchErrors(getBookById));
-router.patch('/:id', catchErrors(patchBook));
+router.get(
+  '/:id',
+  check('id')
+    .isInt()
+    .withMessage('Id þarf að vera tala'),
+  catchErrors(getBookById),
+);
+router.patch(
+  '/:id',
+  check('id')
+    .isInt()
+    .withMessage('Id þarf að vera tala'),
+  catchErrors(patchBook),
+);
 module.exports = router;
