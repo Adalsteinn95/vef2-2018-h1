@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 
 const connectionString =
-  process.env.DATABASE_URL;
+  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -19,10 +19,12 @@ async function query(sqlQuery, values = []) {
 
   let result;
 
+
   try {
     result = await client.query(sqlQuery, values);
   } catch (err) {
     console.error('Error executing query', err);
+    console.info(values);
     throw err;
   } finally {
     await client.end();
@@ -243,6 +245,12 @@ async function createBook({
   const queryString =
     'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
 
+
+  let pages = parseInt(xss(pagecount), 10);
+
+  if (Number.isNaN(pages)) {
+    pages = 0;
+  }
   const values = [
     xss(title),
     xss(isbn13),
@@ -251,10 +259,9 @@ async function createBook({
     xss(category),
     xss(isbn10),
     xss(published),
-    xss(pagecount),
+    pages,
     xss(language),
   ];
-
   const result = await query(queryString, values);
 
   return result;
