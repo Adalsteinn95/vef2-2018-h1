@@ -82,6 +82,7 @@ app.post(
 );
 app.post(
   '/register',
+  requireAuthentication,
   check('username')
     .isLength({ min: 3 })
     .withMessage('Notendanafn verður að vera amk 3 stafir'),

@@ -132,7 +132,7 @@ function deleteReadBook(req, res) {
   // do stuff
 }
 
-router.get('/', catchErrors(getUsers));
+router.get('/', requireAuthentication, catchErrors(getUsers));
 router.get('/me', requireAuthentication, catchErrors(getMe));
 router.patch(
   '/me',
@@ -147,12 +147,13 @@ router.patch(
   requireAuthentication,
   catchErrors(patchUser),
 );
-router.get('/:id', catchErrors(getUserById));
+router.get('/:id', requireAuthentication, catchErrors(getUserById));
 // router.post('/me/profile', catchErrors(setPhoto));
-router.get('/users/:id/read', catchErrors(getReadBooks));
-router.get('/users/me/read', catchErrors(getMyReadBooks));
+router.get('/users/:id/read', requireAuthentication, catchErrors(getReadBooks));
+router.get('/users/me/read', requireAuthentication, catchErrors(getMyReadBooks));
 router.post(
   '/users/me/read',
+  requireAuthentication,
   check('rating')
     .isInt({
       min: 1,
@@ -161,6 +162,6 @@ router.post(
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   catchErrors(newReadBook),
 );
-router.delete('/users/me/read/:id', catchErrors(deleteReadBook));
+router.delete('/users/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
 
 module.exports = router;
