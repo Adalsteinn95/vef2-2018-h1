@@ -2,56 +2,37 @@ const db = require('./db');
 const csv = require('csvtojson');
 
 /**
- * add books from csv synchronously
- *
- * @returns {boolean}
- *
- */
-async function addBooks(result) {
-  const csvFilePath = './data/books.csv';
-  const books = [];
-  const b = await csv()
-    .fromFile(csvFilePath)
-    .on('json', (jsonObj) => {
-      books.push(jsonObj);
-    })
-    .on('done', async () => {
-      /* ugly but it needs to like this we only got 100 connections to server */
-      for (let i = 0; i < books.length; i += 1) {
-        // eslint-disable-next-line
-        if(isNaN(parseInt(books[i].pagecount,10))){
-          books[i].pagecount = 0;
-        };
-        await db.createBook(books[i]);
-      }
-
-      return true;
-    });
-
-  return b;
-}
-
-
-/**
  * add Categories from csv synchronously
  *
  * @returns {boolean}
  *
  */
-async function addCategories() {
+async function addToDatabase() {
   const csvFilePath = './data/books.csv';
-  let books = [];
+  const books = [];
   const a = await csv()
     .fromFile(csvFilePath)
-    .on('json', (jsonObj) => {
-      books.push(jsonObj.category);
-    })
+    .on('json', jsonObj => books.push(jsonObj))
     .on('done', async () => {
       /* ugly but it needs to like this we only got 100 connections to server */
-      books = Array.from(new Set(books));
-      for (let i = 0; i < books.length; i += 1) {
+      const newBooks = books;
+
+      const categories = books.map(item => item.category);
+
+      const newCategories = Array.from(new Set(categories));
+      for (let i = 0; i < newCategories.length; i += 1) {
         // eslint-disable-next-line
-        await db.createCategory(books[i]);
+        await db.createCategory(newCategories[i]);
+      }
+
+      /* ugly but it needs to like this we only got 100 connections to server */
+      for (let i = 0; i < newBooks.length; i += 1) {
+        // eslint-disable-next-line
+        if (isNaN(parseInt(newBooks[i].pagecount, 10))) {
+          newBooks[i].pagecount = 0;
+        }
+        // eslint-disable-next-line
+        await db.createBook(newBooks[i]);
       }
       return books;
     });
@@ -60,10 +41,7 @@ async function addCategories() {
 }
 
 async function init() {
-  addCategories();
-
-  setTimeout(addBooks, 1000);
+  addToDatabase();
 }
-
 
 init();
