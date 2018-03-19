@@ -56,7 +56,7 @@ PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn,
 async function patchUser(req, res) {
   const { id } = req.user;
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
+  if (errors.isEmpty()) {
     const { name, password } = req.body;
     await db.alterUser({
       id,
@@ -104,10 +104,9 @@ router.post('/me/profile', upload.single('image'), async (req, res) => {
 /*
 GET skilar síðu af lesnum bókum notanda
 */
-function getReadBooks(req, res) {
-  const { id } = req.user;
-  console.log(id);
-  const books = db.getReadBooks(id);
+async function getReadBooks(req, res) {
+  const { id } = req.param;
+  const books = await db.getReadBooks(id);
   if (books) {
     return res.status(200).json(books);
   }
@@ -117,25 +116,47 @@ function getReadBooks(req, res) {
 /*
 GET skilar síðu af lesnum bókum innskráðs notanda
 */
-function getMyReadBooks(req, res) {
-  // do stuff
+async function getMyReadBooks(req, res) {
+  const { id } = req.user;
+  const books = await db.getReadBooks(id);
+  if (books) {
+    return res.status(200).json(books);
+  }
+  return res.status(404);
 }
 
 /*
 POST býr til nýjan lestur á bók og skilar
 */
 
-function newReadBook(req, res) {
-  // do stuff
+async function newReadBook(req, res) {
+  const errors = validationResult(req);
+  const { bookID = '', rating = '', ratingtext = '' } = req.body;
+  if (errors.isEmpty()) {
+    const { id: userID } = req.user;
 
-  return 'hallo';
+    const result = await db.addReadBook({
+      userID,
+      bookID,
+      rating,
+      ratingtext,
+    });
+    return res.status(200).json(result);
+  }
+  return res.status(404);
 }
 
 /*
 DELETE eyðir lestri bókar fyrir innskráðan notanda
 */
-function deleteReadBook(req, res) {
-  // do stuff
+async function deleteReadBook(req, res) {
+  const { bookID } = req.body;
+  const { id } = req.user;
+  const result = await db.del({ id, bookID });
+  if (result) {
+    return res.status(204).json();
+  }
+  return res.status(404);
 }
 
 router.get('/', requireAuthentication, catchErrors(getUsers));
@@ -153,12 +174,9 @@ router.patch(
   requireAuthentication,
   catchErrors(patchUser),
 );
-router.get('/:id', requireAuthentication, catchErrors(getUserById));
-// router.post('/me/profile', catchErrors(setPhoto));
-router.get('/users/:id/read', requireAuthentication, catchErrors(getReadBooks));
-router.get('/users/me/read', requireAuthentication, catchErrors(getMyReadBooks));
+router.get('/me/read', requireAuthentication, catchErrors(getMyReadBooks));
 router.post(
-  '/users/me/read',
+  '/me/read',
   requireAuthentication,
   check('rating')
     .isInt({
@@ -168,6 +186,9 @@ router.post(
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   catchErrors(newReadBook),
 );
-router.delete('/users/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
+router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
+router.get('/:id', requireAuthentication, catchErrors(getUserById));
+// router.post('/me/profile', catchErrors(setPhoto));
+router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
 
 module.exports = router;

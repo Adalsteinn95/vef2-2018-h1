@@ -333,7 +333,7 @@ async function getReadBooks(userID) {
 
   const result = await query(queryString, values);
 
-  return result;
+  return result.rows;
 }
 
 /**
@@ -349,16 +349,14 @@ async function getReadBooks(userID) {
 async function addReadBook({
   userID, bookID, rating, ratingtext,
 } = {}) {
-  /* to do */
-
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
 
   const queryString =
-    'INSERT into readBooks(userid, bookid, rating) VALUES ($1, $2, $3) RETURNING *';
+    'INSERT into readBooks(userid, bookid, rating, ratingtext) VALUES ($1, $2, $3, $4) RETURNING *';
 
   const result = await query(queryString, values);
 
-  return result;
+  return result.rows[0];
 }
 
 /**
