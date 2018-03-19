@@ -25,7 +25,7 @@ lykilorðs hash skal ekki vera sýnilegt
 async function getUsers(req, res) {
   const result = await db.readAllUsers();
   if (result.length === 0) {
-    res.status(204).json();
+    return res.status(204).json();
   }
   const finalResult = result.map((i) => {
     const {
@@ -39,14 +39,14 @@ async function getUsers(req, res) {
     };
   });
 
-  res.json({ finalResult });
+  return res.json({ finalResult });
 }
 
 /*
 GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
 function getMe(req, res) {
-  res.json({ user: req.user });
+  return res.json({ user: req.user });
 }
 
 /*
@@ -105,7 +105,13 @@ router.post('/me/profile', upload.single('image'), async (req, res) => {
 GET skilar síðu af lesnum bókum notanda
 */
 function getReadBooks(req, res) {
-  // do stuff
+  const { id } = req.user;
+  console.log(id);
+  const books = db.getReadBooks(id);
+  if (books) {
+    return res.status(200).json(books);
+  }
+  return res.status(404);
 }
 
 /*
