@@ -150,9 +150,10 @@ async function newReadBook(req, res) {
 DELETE eyðir lestri bókar fyrir innskráðan notanda
 */
 async function deleteReadBook(req, res) {
-  const { bookID } = req.body;
+  const { id: bookID } = req.params;
   const { id } = req.user;
-  const result = await db.del({ id, bookID });
+  console.log(id, bookID);
+  const result = await db.del(id, bookID);
   if (result) {
     return res.status(204).json();
   }
