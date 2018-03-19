@@ -1,7 +1,7 @@
 drop table readBooks;
-drop table books;
-drop table categories;
-drop table users;
+drop table Books;
+drop table Categories;
+drop table Users;
 
 
 
@@ -39,4 +39,3 @@ CREATE TABLE readBooks(
     rating       INTEGER    NOT NULL CHECK (rating BETWEEN 1 AND 5),
     ratingtext   text
 );
-

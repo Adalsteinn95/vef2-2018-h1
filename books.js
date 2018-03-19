@@ -93,7 +93,7 @@ async function patchBook(req, res) {
   return res.status(404).json({ errors });
 }
 
-router.post('/', bookValidation, catchErrors(createBook));
+router.post('/', requireAuthentication, bookValidation, catchErrors(createBook));
 router.get('/', catchErrors(getAllBooks));
 router.get(
   '/:id',
@@ -104,6 +104,7 @@ router.get(
 );
 router.patch(
   '/:id',
+  requireAuthentication,
   bookValidation,
   check('id')
     .isInt()

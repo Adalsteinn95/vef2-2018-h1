@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const books = require('./books');
 const users = require('./users');
 const db = require('./db');
+const xss = require('xss');
 
 const { requireAuthentication, getToken, passport } = require('./passport');
 
@@ -43,14 +44,18 @@ POST býr til notanda og skilar án lykilorðs hash
 */
 async function registerUser(req, res) {
   const { username = '', password = '', name = '' } = req.body;
+  const data = {
+    username: xss(username).toString(),
+    password: xss(password).toString(),
+    name: xss(name).toString(),
+  };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(i => ({ field: i.param, message: i.msg }));
     return res.status(404).json({ errorMessages });
   }
-  return db
-    .createUser({ username, password, name })
-    .then(result => res.status(201).json({ result }));
+
+  return db.createUser(data).then(result => res.status(201).json({ result }));
 }
 
 /*
@@ -89,7 +94,7 @@ app.post(
     .isLength({ min: 6 })
     .withMessage('Lykilorð verður að vera amk 6 stafir'),
   check('name')
-    .isEmpty()
+    .isLength({ min: 1 })
     .withMessage('Nafn má ekki vera tómt'),
   catchErrors(registerUser),
 );
