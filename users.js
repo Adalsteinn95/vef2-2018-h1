@@ -12,9 +12,7 @@ const multer = require('multer');
 
 const upload = multer({});
 
-const {
-  catchErrors,
-} = require('./utils');
+const { catchErrors } = require('./utils');
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -27,10 +25,7 @@ async function getUsers(req, res) {
   }
   const finalResult = result.map((i) => {
     const {
-      id,
-      username,
-      name,
-      image,
+      id, username, name, image,
     } = i;
     return {
       id,
@@ -103,20 +98,15 @@ async function getUserById(req, res) {
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
 async function setPhoto(req, res) {
-  const {
-    file: {
-      buffer,
-    } = {},
-  } = req;
+  const { file: { buffer } = {} } = req;
 
   if (!buffer) {
     return res.status(404).send('Loading image failed');
   }
 
   const result = await cloud.upload(buffer);
-  return res.send({
-    url: result.secure_url,
-  });
+  const image = await db.alterUserImage({ image: result.secure_url, id: req.user.id });
+  return res.send(image);
 }
 
 /*
@@ -149,11 +139,7 @@ POST býr til nýjan lestur á bók og skilar
 */
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  const {
-    bookID = '',
-    rating = '',
-    ratingtext = '',
-  } = req.body;
+  const { bookID = '', rating = '', ratingtext = '' } = req.body;
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
     const result = await db.addReadBook({
@@ -207,11 +193,7 @@ router.post(
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   catchErrors(newReadBook),
 );
-router.delete(
-  '/me/read/:id',
-  requireAuthentication,
-  catchErrors(deleteReadBook),
-);
+router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
 router.get('/:id', requireAuthentication, catchErrors(getUserById));
 router.post('/me/profile', upload.single('image'), catchErrors(setPhoto));
 router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
