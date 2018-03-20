@@ -26,17 +26,23 @@ app.use('/users', users);
 GET skilar síðu af flokkum
 */
 async function getCategories(req, res) {
-  // do stuff
+  const categories = await db.readAllCategories();
+  if (categories) {
+    return res.status(200).json(categories);
+  }
+  return res.status(404).json();
 }
 /*
 POST býr til nýjan flokk og skilar
 */
 async function createCategory(req, res) {
+  const { name = '' } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    // do stuff
+    const errorMessages = errors.array().map(i => ({ field: i.param, message: i.msg }));
+    return res.status(404).json({ errorMessages });
   }
-  // do other stuff
+  return db.createCategory(xss(name).toString()).then(result => res.status(201).json({ result }));
 }
 
 /*
@@ -64,11 +70,11 @@ POST með notendanafni og lykilorði skilar token
 async function loginUser(req, res) {
   const { username, password } = req.body;
 
-  const user = await db.findByUsername(username);
+  const user = await db.findByUsername(username.toString());
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
   }
-  const passwordIsCorrect = await db.comparePasswords(password, user.password);
+  const passwordIsCorrect = await db.comparePasswords(password.toString(), user.password);
 
   if (passwordIsCorrect) {
     const token = getToken(user);
@@ -81,8 +87,9 @@ app.get('/categories', catchErrors(getCategories));
 app.post(
   '/categories',
   check('name')
-    .isEmpty()
+    .isLength({ min: 1 })
     .withMessage('Nafn á flokki má ekki vera tómt'),
+  requireAuthentication,
   catchErrors(createCategory),
 );
 app.post(

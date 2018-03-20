@@ -1,6 +1,7 @@
 const { Client } = require('pg');
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
+const connectionString =
+  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -152,7 +153,7 @@ async function readAllCategories() {
 
   const result = await query(queryString, null);
 
-  return result;
+  return result.rows;
 }
 
 /**
