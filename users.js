@@ -10,7 +10,7 @@ const router = express.Router();
 
 const db = require('./db');
 const cloud = require('./cloud');
-
+const xss = require('xss');
 /* image */
 const multer = require('multer');
 
@@ -44,20 +44,21 @@ async function getUsers(req, res) {
       image,
     };
   });
-
-  console.info(finalResult);
-
-  return res.json({
-    finalResult,
-  });
+  return res.json(finalResult);
 }
 
 /*
 GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
-function getMe(req, res) {
+async function getMe(req, res) {
+  const {
+    id, name, username, profile,
+  } = req.user;
   return res.json({
-    user: req.user,
+    id,
+    name,
+    username,
+    profile,
   });
 }
 
@@ -66,25 +67,18 @@ PATCH uppfærir sendar upplýsingar um notanda fyrir utan notendanafn,
 þ.e.a.s. nafn eða lykilorð, ef þau eru gild
 */
 async function patchUser(req, res) {
-  const {
-    id,
-  } = req.user;
   const errors = validationResult(req);
   if (errors.isEmpty()) {
-    const {
-      name,
-      password,
-    } = req.body;
+    const { id } = req.user;
+    const { name, password } = req.body;
     await db.alterUser({
       id,
-      name,
-      password,
+      name: xss(name.toString()),
+      password: xss(password.toString()),
     });
     return res.status(204).json();
   }
-  return res.status(404).json({
-    errors,
-  });
+  return res.status(404).json(errors.array());
 }
 
 /*
@@ -93,6 +87,9 @@ Lykilorðs hash skal ekki vera sýnilegt
 */
 async function getUserById(req, res) {
   const { id } = req.params;
+  if (typeof id !== 'number') {
+    return res.status(404).json({ error: 'Notandi fannst ekki' });
+  }
   const user = await db.findById(id);
   if (user) {
     return res.json({
@@ -124,7 +121,6 @@ async function setPhoto(req, res) {
   }
 
   const result = await cloud.upload(buffer);
-
   return res.send({
     url: result.secure_url,
   });
@@ -209,7 +205,7 @@ router.patch(
     })
     .withMessage('Lykilorð verður að vera amk 6 stafir'),
   check('name')
-    .isEmpty()
+    .isLength({ min: 1 })
     .withMessage('Nafn má ekki vera tómt'),
   requireAuthentication,
   catchErrors(patchUser),

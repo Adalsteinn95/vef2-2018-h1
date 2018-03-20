@@ -74,7 +74,7 @@ async function registerUser(req, res) {
     return res.status(404).json({ errorMessages });
   }
 
-  return db.createUser(data).then(result => res.status(201).json({ result }));
+  return db.createUser(data).then(result => res.status(201).json(result));
 }
 
 /*

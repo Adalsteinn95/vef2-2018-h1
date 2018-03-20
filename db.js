@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const connectionString = process.env.DATABASE_URL;
 const { Client } = require('pg');
 
 const connectionString = process.env.DATABASE_URL;
@@ -29,7 +30,6 @@ async function query(sqlQuery, values = []) {
   } finally {
     await client.end();
   }
-
   return result;
 }
 
@@ -45,7 +45,8 @@ async function query(sqlQuery, values = []) {
  */
 async function createUser({ username, password, name } = {}) {
   const hashedPassword = await bcrypt.hash(password, 11);
-  const q = 'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING *';
+  const q =
+    'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING username,name';
 
   const result = await query(q, [username, hashedPassword, name]);
 
@@ -316,7 +317,6 @@ async function createBook({
     xss(language),
   ];
   const result = await query(queryString, values);
-
   return result;
 }
 
