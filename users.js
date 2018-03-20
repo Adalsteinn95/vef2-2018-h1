@@ -82,10 +82,11 @@ Lykilorðs hash skal ekki vera sýnilegt
 */
 async function getUserById(req, res) {
   const { id } = req.params;
-  if (typeof id !== 'number') {
+  const number = parseInt(id, 10);
+  if (Number.isNaN(number)) {
     return res.status(404).json({ error: 'Notandi fannst ekki' });
   }
-  const user = await db.findById(id);
+  const user = await db.findById(number);
   if (user) {
     return res.json({
       id: user.id,
@@ -154,6 +155,7 @@ async function newReadBook(req, res) {
     rating = '',
     ratingtext = '',
   } = req.body;
+
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
     const result = await db.addReadBook({
@@ -164,7 +166,7 @@ async function newReadBook(req, res) {
     });
     return res.status(200).json(result);
   }
-  return res.status(404);
+  return res.status(404).json(errors.array());
 }
 
 /*
