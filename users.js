@@ -45,7 +45,7 @@ async function getUsers(req, res) {
 /*
 GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
-function getMe(req, res) {
+async function getMe(req, res) {
   const {
     id, name, username, profile,
   } = req.user;
