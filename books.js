@@ -1,16 +1,12 @@
 const express = require('express');
-const {
-  check,
-  validationResult,
-} = require('express-validator/check');
+const { check, validationResult } = require('express-validator/check');
 
 const db = require('./db');
 const { requireAuthentication } = require('./passport');
+
 const router = express.Router();
 
-const {
-  catchErrors,
-} = require('./utils');
+const { catchErrors } = require('./utils');
 
 const bookValidation = [
   check('title')
@@ -18,6 +14,11 @@ const bookValidation = [
       min: 1,
     })
     .withMessage('Titill bókar má ekki vera tómur'),
+  check('category')
+    .isLength({
+      min: 1,
+    })
+    .withMessage('Flokkur bókar má ekki vera tómur'),
   check('isbn13')
     .isISBN(13)
     .withMessage('ISBN 13 er ekki á réttu formi'),
@@ -42,10 +43,7 @@ GET skilar síðu af bókum
 */
 
 async function getAllBooks(req, res) {
-  const {
-    search,
-    offset = 0,
-  } = req.query;
+  const { search, offset = 0 } = req.query;
 
   const offsets = parseInt(offset, 10);
 
@@ -96,9 +94,7 @@ async function createBook(req, res) {
 GET skilar stakri bók
 */
 async function getBookById(req, res) {
-  const {
-    id,
-  } = req.params;
+  const { id } = req.params;
   const validation = validationResult(req);
   if (validation.isEmpty()) {
     const result = await db.getOneBook(id);
@@ -114,9 +110,7 @@ async function getBookById(req, res) {
 PATCH uppfærir bók
 */
 async function patchBook(req, res) {
-  const {
-    id,
-  } = req.params;
+  const { id } = req.params;
   const validation = validationResult(req);
 
   if (validation.isEmpty()) {

@@ -10,7 +10,7 @@ CREATE TABLE Users (
     username     text NOT NULL UNIQUE CHECK (char_length(username) > 2),
     password     text NOT NULL CHECK (char_length(password) > 5),
     name         text NOT NULL CHECK (username <> ''),
-    image        VARCHAR(64)
+    image        text
 );
 
 CREATE TABLE Categories (

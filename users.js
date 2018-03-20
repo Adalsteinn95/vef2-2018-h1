@@ -12,9 +12,7 @@ const multer = require('multer');
 
 const upload = multer({});
 
-const {
-  catchErrors,
-} = require('./utils');
+const { catchErrors } = require('./utils');
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -27,10 +25,7 @@ async function getUsers(req, res) {
   }
   const finalResult = result.map((i) => {
     const {
-      id,
-      username,
-      name,
-      image,
+      id, username, name, image,
     } = i;
     return {
       id,
@@ -104,20 +99,17 @@ async function getUserById(req, res) {
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
 async function setPhoto(req, res) {
-  const {
-    file: {
-      buffer,
-    } = {},
-  } = req;
+  const { file: { buffer } = {} } = req;
 
   if (!buffer) {
     return res.status(404).send('Loading image failed');
   }
-
   const result = await cloud.upload(buffer);
-  return res.send({
-    url: result.secure_url,
-  });
+  const image = await db.alterUserImage({ image: result.secure_url, id: req.user.id });
+  if (image) {
+    return res.status(201).json(image);
+  }
+  return res.status(404).json();
 }
 
 /*
@@ -150,23 +142,25 @@ POST býr til nýjan lestur á bók og skilar
 */
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  const {
-    bookID = '',
-    rating = '',
-    ratingtext = '',
-  } = req.body;
-
+  
+  const { bookID, rating, ratingtext = '' } = req.body;
+  if (bookID == null) {
+    return res.status(404).json({ error: 'bookID má ekki vera tómt' });
+  }
+  if (rating == null) {
+    return res.status(404).json({ error: 'rating má ekki vera tómt' });
+  }
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
     const result = await db.addReadBook({
-      userID,
-      bookID,
-      rating,
-      ratingtext,
+      userID: xss(userID.toString()),
+      bookID: xss(bookID.toString()),
+      rating: Number(rating),
+      ratingtext: xss(ratingtext.toString()),
     });
     return res.status(200).json(result);
   }
-  return res.status(404).json(errors.array());
+  return res.status(404).json({ errors: errors.array() });
 }
 
 /*
@@ -200,22 +194,18 @@ router.patch(
 router.get('/me/read', requireAuthentication, catchErrors(getMyReadBooks));
 router.post(
   '/me/read',
-  requireAuthentication,
   check('rating')
     .isInt({
       min: 1,
       max: 5,
     })
-    .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
+    .withMessage('Einkunn verður að vera á bilinu 1-5'),
+  requireAuthentication,
   catchErrors(newReadBook),
 );
-router.delete(
-  '/me/read/:id',
-  requireAuthentication,
-  catchErrors(deleteReadBook),
-);
+router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
 router.get('/:id', requireAuthentication, catchErrors(getUserById));
-router.post('/me/profile', upload.single('image'), catchErrors(setPhoto));
+router.post('/me/profile', requireAuthentication, upload.single('image'), catchErrors(setPhoto));
 router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
 
 module.exports = router;

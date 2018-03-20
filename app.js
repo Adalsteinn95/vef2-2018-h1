@@ -2,10 +2,8 @@ require('dotenv').config();
 
 const express = require('express');
 const { check, validationResult } = require('express-validator/check');
-const { Strategy, ExtractJwt } = require('passport-jwt');
 
 const app = express();
-const jwt = require('jsonwebtoken');
 
 const books = require('./books');
 const users = require('./users');
@@ -26,24 +24,20 @@ app.use('/users', users);
 GET skilar síðu af flokkum
 */
 async function getCategories(req, res) {
-  const {
-    offset = 0,
-  } = req.query;
+  const { offset = 0 } = req.query;
 
   const offsets = parseInt(offset, 10);
-
   if (Number.isNaN(offsets)) {
-    res.status(401).send({
+    return res.status(401).send({
       error: 'offset must be a number',
     });
-  } else {
-    const categories = await db.readAllCategories(offsets);
-
-    if (categories.length > 0) {
-      return res.status(200).json({ LIMIT: 10, offsets, categories });
-    }
-    return res.status(404).json({ error: 'This is awkward, found was nothing!' });
   }
+  const categories = await db.readAllCategories(offsets);
+
+  if (categories.length > 0) {
+    return res.status(200).json({ LIMIT: 10, offsets, categories });
+  }
+  return res.status(404).json({ error: 'This is awkward, found was nothing!' });
 }
 /*
 POST býr til nýjan flokk og skilar
@@ -119,7 +113,7 @@ async function init(req, res) {
     },
   });
 }
-app.get('/',catchErrors(init));
+app.get('/', catchErrors(init));
 app.get('/categories', catchErrors(getCategories));
 app.post(
   '/categories',
@@ -150,11 +144,10 @@ function notFoundHandler(req, res, next) {
 }
 // eslint-disable-next-line
 function errorHandler(err, req, res, next) {
-
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     return res.status(400).json({ error: 'Invalid json' });
   }
-
+  console.error(err);
   return res.status(500).json({ error: 'Internal server error' });
 }
 

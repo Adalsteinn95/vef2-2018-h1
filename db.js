@@ -51,7 +51,7 @@ async function createUser({ username, password, name } = {}) {
 
   return result.rows[0];
 }
-// VANTAR DOCS
+
 async function comparePasswords(hash, password) {
   const result = await bcrypt.compare(hash, password);
 
@@ -119,7 +119,6 @@ async function findById(id) {
  * @param {number} id - Id of user to update
  * @param {string} name - new name for user
  * @param {string} password - new password for user
- * @param {string} image - new image for user
  *
  * @returns {Promise} Promise representing the new version of the user object
  *
@@ -142,8 +141,30 @@ async function alterUser({ id, name, password } = {}) {
 }
 
 /**
+ * Update user image asynchronously.
+ *
+ * @param {number} id - Id of user to update
+ * @param {string} image - new image for user
+ *
+ * @returns {Promise} Promise representing the new version of the user object
+ *
+ */
+async function alterUserImage({ image, id } = {}) {
+  const values = [xss(image), xss(id)];
+
+  const queryString = 'UPDATE users SET image = $1 WHERE id = $2 RETURNING image';
+
+  const result = await query(queryString, values);
+
+  if (result.rowCount === 0) {
+    return null;
+  }
+  return result.rows[0];
+}
+
+/**
  * Read all Categories asynchronously.
- * 
+ *
  * @param {number} offset - offset on page
  *
  * @returns {Promise} Promise representing an array of all categories object
@@ -297,7 +318,7 @@ async function createBook({
 } = {}) {
   /* todo útfæra */
   const queryString =
-    'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+    'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
 
   let pages = parseInt(xss(pagecount), 10);
 
@@ -316,7 +337,7 @@ async function createBook({
     xss(language),
   ];
   const result = await query(queryString, values);
-  return result;
+  return result.rows;
 }
 
 /**
@@ -407,6 +428,7 @@ module.exports = {
   findById,
   findByUsername,
   alterUser,
+  alterUserImage,
   readAllCategories,
   createCategory,
   getAllBooks,

@@ -1,11 +1,13 @@
 {
   "name": "vef2-2018-h1",
   "version": "1.0.0",
-  "description": "Útfæra skal vefþjónustu fyrir „bókasafn“ með notendaumsjón. Gefin eru gögn fyrir bækur og flokka.",
+  "description":
+    "Útfæra skal vefþjónustu fyrir „bókasafn“ með notendaumsjón. Gefin eru gögn fyrir bækur og flokka.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "eslint": "eslint *.js **/*.js"
   },
   "repository": {
     "type": "git",
