@@ -3,7 +3,6 @@ require('dotenv').config();
 const { Client } = require('pg');
 
 const connectionString = process.env.DATABASE_URL;
-
 const bcrypt = require('bcrypt');
 const xss = require('xss');
 /**
@@ -153,7 +152,7 @@ async function readAllCategories() {
 
   const result = await query(queryString, null);
 
-  return result;
+  return result.rows;
 }
 
 /**
