@@ -14,6 +14,11 @@ const bookValidation = [
       min: 1,
     })
     .withMessage('Titill bókar má ekki vera tómur'),
+  check('category')
+    .isLength({
+      min: 1,
+    })
+    .withMessage('Flokkur bókar má ekki vera tómur'),
   check('isbn13')
     .isISBN(13)
     .withMessage('ISBN 13 er ekki á réttu formi'),

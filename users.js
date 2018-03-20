@@ -103,10 +103,12 @@ async function setPhoto(req, res) {
   if (!buffer) {
     return res.status(404).send('Loading image failed');
   }
-
   const result = await cloud.upload(buffer);
   const image = await db.alterUserImage({ image: result.secure_url, id: req.user.id });
-  return res.send(image);
+  if (image) {
+    return res.status(201).json(image);
+  }
+  return res.status(404).json();
 }
 
 /*
@@ -195,7 +197,7 @@ router.post(
 );
 router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
 router.get('/:id', requireAuthentication, catchErrors(getUserById));
-router.post('/me/profile', upload.single('image'), catchErrors(setPhoto));
+router.post('/me/profile', requireAuthentication, upload.single('image'), catchErrors(setPhoto));
 router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
 
 module.exports = router;

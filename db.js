@@ -317,7 +317,7 @@ async function createBook({
 } = {}) {
   /* todo útfæra */
   const queryString =
-    'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
+    'INSERT INTO Books(title, ISBN13, author, description, category, ISBN10, published, pagecount, language) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
 
   let pages = parseInt(xss(pagecount), 10);
 
@@ -336,7 +336,7 @@ async function createBook({
     xss(language),
   ];
   const result = await query(queryString, values);
-  return result;
+  return result.rows;
 }
 
 /**
