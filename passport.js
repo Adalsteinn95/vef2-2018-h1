@@ -7,7 +7,7 @@ const db = require('./db');
 const {
   PORT: port = 3000,
   JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 60000,
+  TOKEN_LIFETIME: tokenLifetime = 600000000000000000000000000000000000000000000000000000000000000000000000,
 } = process.env;
 
 if (!jwtSecret) {
@@ -39,6 +39,7 @@ function requireAuthentication(req, res, next) {
     }
 
     if (!user) {
+      console.log(err, user, info);
       const error = info.name === 'TokenExpiredError' ? 'expired token' : 'invalid token';
       return res.status(401).json({ error });
     }
