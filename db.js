@@ -142,15 +142,17 @@ async function alterUser({ id, name, password } = {}) {
 
 /**
  * Read all Categories asynchronously.
+ * 
+ * @param {number} offset - offset on page
  *
  * @returns {Promise} Promise representing an array of all categories object
  */
-async function readAllCategories() {
+async function readAllCategories(offset) {
   /* todo útfæra */
 
-  const queryString = 'SELECT * from categories';
+  const queryString = 'SELECT * from categories ORDER BY name LIMIT 10 OFFSET $1';
 
-  const result = await query(queryString, null);
+  const result = await query(queryString, [offset]);
 
   return result.rows;
 }

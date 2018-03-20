@@ -26,11 +26,24 @@ app.use('/users', users);
 GET skilar síðu af flokkum
 */
 async function getCategories(req, res) {
-  const categories = await db.readAllCategories();
-  if (categories) {
-    return res.status(200).json(categories);
+  const {
+    offset = 0,
+  } = req.query;
+
+  const offsets = parseInt(offset, 10);
+
+  if (Number.isNaN(offsets)) {
+    res.status(401).send({
+      error: 'offset must be a number',
+    });
+  } else {
+    const categories = await db.readAllCategories(offsets);
+
+    if (categories.length > 0) {
+      return res.status(200).json({ LIMIT: 10, offsets, categories });
+    }
+    return res.status(404).json({ error: 'This is awkward, found was nothing!' });
   }
-  return res.status(404).json();
 }
 /*
 POST býr til nýjan flokk og skilar
