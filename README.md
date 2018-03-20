@@ -6,10 +6,15 @@ Vefþjónusta fyrir bókasöfn
 _____________
 
 Þú þarft að hafa Node uppsett hjá þér.
-```
-sudo apt-get install node #fyrir linux
-brew install node #fyrir mac
-rm -rf ~ #fyrir windows
+```bash
+#fyrir linux
+> sudo apt-get install node 
+
+#fyrir mac
+> brew install node
+
+#fyrir windows
+> rm -rf ~ 
 ```
 
 ## Uppsetning
