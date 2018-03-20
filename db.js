@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
 const { Client } = require('pg');
+
 const bcrypt = require('bcrypt');
 const xss = require('xss');
 /**
