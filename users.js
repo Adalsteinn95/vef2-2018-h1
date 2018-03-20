@@ -1,12 +1,9 @@
 const express = require('express');
 
 const { check, validationResult } = require('express-validator/check');
-const { requireAuthentication, passport } = require('./passport');
+const { requireAuthentication } = require('./passport');
 
 const router = express.Router();
-
-const bcrypt = require('bcrypt');
-const { Client } = require('pg');
 const db = require('./db');
 const cloud = require('./cloud');
 const xss = require('xss');
@@ -21,7 +18,6 @@ const { catchErrors } = require('./utils');
 GET skilar síðu (sjá að neðan) af notendum
 lykilorðs hash skal ekki vera sýnilegt
 */
-
 async function getUsers(req, res) {
   const result = await db.readAllUsers();
   if (result.length === 0) {
@@ -101,8 +97,6 @@ async function getUserById(req, res) {
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
 router.post('/me/profile', upload.single('image'), async (req, res) => {
-  // do stuff
-
   const { file: { buffer } = {} } = req;
 
   if (!buffer) {
@@ -139,13 +133,11 @@ async function getMyReadBooks(req, res) {
 /*
 POST býr til nýjan lestur á bók og skilar
 */
-
 async function newReadBook(req, res) {
   const errors = validationResult(req);
   const { bookID = '', rating = '', ratingtext = '' } = req.body;
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
-
     const result = await db.addReadBook({
       userID,
       bookID,
@@ -163,7 +155,6 @@ DELETE eyðir lestri bókar fyrir innskráðan notanda
 async function deleteReadBook(req, res) {
   const { id: bookID } = req.params;
   const { id } = req.user;
-  console.log(id, bookID);
   const result = await db.del(id, bookID);
   if (result) {
     return res.status(204).json();
