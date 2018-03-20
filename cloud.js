@@ -14,7 +14,6 @@ cloud.config({
  * @returns {Promise} result - object containing the information about the storage
  */
 async function upload(imageBuffer) {
-  
   const imageString = imageBuffer.toString('base64');
 
   let result;
