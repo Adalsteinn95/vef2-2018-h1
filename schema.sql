@@ -1,10 +1,3 @@
-drop table readBooks;
-drop table Books;
-drop table Categories;
-drop table Users;
-
-
-
 CREATE TABLE Users (
     id           serial PRIMARY KEY,
     username     text NOT NULL UNIQUE CHECK (char_length(username) > 2),
