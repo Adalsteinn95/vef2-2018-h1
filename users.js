@@ -141,18 +141,24 @@ POST býr til nýjan lestur á bók og skilar
 */
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  const { bookID = '', rating = '', ratingtext = '' } = req.body;
+  const { bookID, rating, ratingtext = '' } = req.body;
+  if (bookID == null) {
+    return res.status(404).json({ error: 'bookID má ekki vera tómt' });
+  }
+  if (rating == null) {
+    return res.status(404).json({ error: 'rating má ekki vera tómt' });
+  }
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
     const result = await db.addReadBook({
-      userID,
-      bookID,
-      rating,
-      ratingtext,
+      userID: xss(userID.toString()),
+      bookID: xss(bookID.toString()),
+      rating: Number(rating),
+      ratingtext: xss(ratingtext.toString()),
     });
     return res.status(200).json(result);
   }
-  return res.status(404);
+  return res.status(404).json({ errors: errors.array() });
 }
 
 /*
@@ -186,13 +192,13 @@ router.patch(
 router.get('/me/read', requireAuthentication, catchErrors(getMyReadBooks));
 router.post(
   '/me/read',
-  requireAuthentication,
   check('rating')
     .isInt({
       min: 1,
       max: 5,
     })
-    .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
+    .withMessage('Einkunn verður að vera á bilinu 1-5'),
+  requireAuthentication,
   catchErrors(newReadBook),
 );
 router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
