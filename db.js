@@ -1,12 +1,13 @@
+require('dotenv').config();
+
+const connectionString = process.env.DATABASE_URL;
 const { Client } = require('pg');
 
-const connectionString =
-  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
-
+const connectionString = process.env.DATABASE_URL;
 const bcrypt = require('bcrypt');
 const xss = require('xss');
 /**
- * Execute an SQL query.
+ * Execute an SQL query
  *
  * @param {string} sqlQuery - SQL query to execute
  * @param {array} [values=[]] - Values for parameterized query
@@ -25,7 +26,6 @@ async function query(sqlQuery, values = []) {
     result = await client.query(sqlQuery, values);
   } catch (err) {
     console.error('Error executing query', err);
-    console.info(values);
     throw err;
   } finally {
     await client.end();
@@ -69,6 +69,7 @@ async function readAllUsers() {
 
   const queryString = 'SELECT * from Users';
 
+  console.info(queryString);
   const result = await query(queryString, null);
 
   return result.rows;
@@ -143,17 +144,19 @@ async function alterUser({ id, name, password } = {}) {
 
 /**
  * Read all Categories asynchronously.
+ * 
+ * @param {number} offset - offset on page
  *
  * @returns {Promise} Promise representing an array of all categories object
  */
-async function readAllCategories() {
+async function readAllCategories(offset) {
   /* todo útfæra */
 
-  const queryString = 'SELECT * from categories';
+  const queryString = 'SELECT * from categories ORDER BY name LIMIT 10 OFFSET $1';
 
-  const result = await query(queryString, null);
+  const result = await query(queryString, [offset]);
 
-  return result;
+  return result.rows;
 }
 
 /**
@@ -186,6 +189,7 @@ async function createCategory(name) {
 async function getAllBooks(offset) {
   /* todo útfæra */
 
+  console.info(offset);
   const queryString = 'SELECT * from Books ORDER BY title LIMIT 10 OFFSET $1';
 
   const result = await query(queryString, [offset]);
@@ -391,7 +395,7 @@ async function del(userID, bookID) {
 async function search(title, description, offset) {
   const queryString =
     'SELECT * from Books WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($2) ORDER BY title LIMIT 10 OFFSET $3';
-  const values = [xss(title), xss(description), offset];
+  const values = [xss(title), xss(description), xss(offset.toString())];
 
   const result = query(queryString, values);
 

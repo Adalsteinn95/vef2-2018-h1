@@ -1,12 +1,13 @@
 const express = require('express');
 
-const { check, validationResult } = require('express-validator/check');
-const { requireAuthentication, passport } = require('./passport');
+const {
+  check,
+  validationResult,
+} = require('express-validator/check');
+const { requireAuthentication } = require('./passport');
 
 const router = express.Router();
 
-const bcrypt = require('bcrypt');
-const { Client } = require('pg');
 const db = require('./db');
 const cloud = require('./cloud');
 const xss = require('xss');
@@ -15,7 +16,9 @@ const multer = require('multer');
 
 const upload = multer({});
 
-const { catchErrors } = require('./utils');
+const {
+  catchErrors,
+} = require('./utils');
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -29,7 +32,10 @@ async function getUsers(req, res) {
   }
   const finalResult = result.map((i) => {
     const {
-      id, username, name, image,
+      id,
+      username,
+      name,
+      image,
     } = i;
     return {
       id,
@@ -38,7 +44,6 @@ async function getUsers(req, res) {
       image,
     };
   });
-
   return res.json(finalResult);
 }
 
@@ -94,29 +99,39 @@ async function getUserById(req, res) {
       image: user.image,
     });
   }
-  return res.status(404).json({ error: 'Notandi fannst ekki' });
+  return res.status(404).json({
+    error: 'Notandi fannst ekki',
+  });
 }
 
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
-router.post('/me/profile', upload.single('image'), async (req, res) => {
+async function setPhoto(req, res) {
   // do stuff
 
-  const { file: { buffer } = {} } = req;
+  const {
+    file: {
+      buffer,
+    } = {},
+  } = req;
 
   if (!buffer) {
-    return res.send('BIG error');
+    return res.status(404).send('Loading image failed');
   }
+
   const result = await cloud.upload(buffer);
-  return res.send({ result });
-});
+  return res.send({
+    url: result.secure_url,
+  });
+}
 
 /*
 GET skilar síðu af lesnum bókum notanda
 */
 async function getReadBooks(req, res) {
-  const { id } = req.param;
+  const { id } = req.params;
+
   const books = await db.getReadBooks(id);
   if (books) {
     return res.status(200).json(books);
@@ -142,9 +157,15 @@ POST býr til nýjan lestur á bók og skilar
 
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  const { bookID = '', rating = '', ratingtext = '' } = req.body;
+  const {
+    bookID = '',
+    rating = '',
+    ratingtext = '',
+  } = req.body;
   if (errors.isEmpty()) {
-    const { id: userID } = req.user;
+    const {
+      id: userID,
+    } = req.user;
 
     const result = await db.addReadBook({
       userID,
@@ -161,9 +182,12 @@ async function newReadBook(req, res) {
 DELETE eyðir lestri bókar fyrir innskráðan notanda
 */
 async function deleteReadBook(req, res) {
-  const { id: bookID } = req.params;
-  const { id } = req.user;
-  console.log(id, bookID);
+  const {
+    id: bookID,
+  } = req.params;
+  const {
+    id,
+  } = req.user;
   const result = await db.del(id, bookID);
   if (result) {
     return res.status(204).json();
@@ -198,9 +222,13 @@ router.post(
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   catchErrors(newReadBook),
 );
-router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
+router.delete(
+  '/me/read/:id',
+  requireAuthentication,
+  catchErrors(deleteReadBook),
+);
 router.get('/:id', requireAuthentication, catchErrors(getUserById));
-// router.post('/me/profile', catchErrors(setPhoto));
+router.post('/me/profile', upload.single('image'), catchErrors(setPhoto));
 router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
 
 module.exports = router;
