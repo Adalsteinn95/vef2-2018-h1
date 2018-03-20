@@ -45,6 +45,8 @@ async function getUsers(req, res) {
     };
   });
 
+  console.info(finalResult);
+
   return res.json({
     finalResult,
   });
@@ -132,7 +134,8 @@ async function setPhoto(req, res) {
 GET skilar síðu af lesnum bókum notanda
 */
 async function getReadBooks(req, res) {
-  const { id } = req.param;
+  const { id } = req.params;
+
   const books = await db.getReadBooks(id);
   if (books) {
     return res.status(200).json(books);
