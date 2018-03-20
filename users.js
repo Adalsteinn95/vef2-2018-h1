@@ -109,7 +109,7 @@ router.post('/me/profile', upload.single('image'), async (req, res) => {
     return res.send('BIG error');
   }
   const result = await cloud.upload(buffer);
-  res.send({ result });
+  return res.send({ result });
 });
 
 /*
