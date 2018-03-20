@@ -96,6 +96,30 @@ async function loginUser(req, res) {
   return res.status(401).json({ error: 'Invalid password' });
 }
 
+async function init(req, res) {
+  res.json({
+    authentication: {
+      register: '/register',
+      login: '/login',
+    },
+    books: {
+      books: '/books',
+      book: '/book/{id}',
+    },
+    categories: '/categories',
+    users: {
+      users: '/users',
+      user: '/users/{id}',
+      read: '/users/{id}/read',
+    },
+    me: {
+      me: '/users/me',
+      profile: '/users/me/profile',
+      read: '/users/me/read',
+    },
+  });
+}
+app.get('/',catchErrors(init));
 app.get('/categories', catchErrors(getCategories));
 app.post(
   '/categories',
