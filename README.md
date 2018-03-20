@@ -76,7 +76,7 @@ node init
   }'
   ```
 
-  - Skilar
+  Skilar
 
   ```
   {
@@ -420,19 +420,18 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' \
   ```
+_____
 
-## README
+# Meðlimir Weather CO.
 
-Í rót verkefnis skal vera `README.md` skjal sem tilgreinir:
+## Þjálfari**(CEO) - Fannar G. Guðmundsson [Github](https://github.com/fgg2)
+* Er í forystu og leiðbeinir á fundum þar sem hópurinn er að forrita og hanna. 
+* Þjálfarinn hefur yfirsýn yfir hvernig teyminu gengur og hvetur aðra áfram. 
+* Þjálfarinn passar upp á að teymið vinni eftir góðri aðferð. 
 
-* Upplýsingar um hvernig setja skuli upp verkefnið
-  - Hvernig gagnagrunnur og töflur eru settar upp
-  - Hvernig gögnum er komið inn í töflur
-* Dæmi um köll í vefþjónustu
-* Nöfn og notendanöfn allra í hóp
+## Kóða- og hönnunarstjóri**(CTO) - Aðalsteinn I. Pálsson [Github](https://github.com/Adalsteinn95)
+* Sér um útgáfu stjórnun, setur kóðastaðla, stýrir paraforritun. 
+* Sér um að kóði sé rýndur og samþykkir Git branch í master. 
+* Gefur út hugbúnaðinn. Hjálpar öðrum með einingaprófanir eða aðrar prófanir. 
+* Vinnur að því að einfalda hönnun og refactora. 
 
-## Git og GitHub
-
-Verkefni þetta er sett fyrir á GitHub og almennt ætti að skila því úr einka (private) repo nemanda. Nemendur geta fengið gjaldfrjálsan aðgang að einka repos á meðan námi stendur, sjá https://education.github.com/.
-
-Til að byrja er hægt að afrita þetta repo og bæta við á sínu eigin:
