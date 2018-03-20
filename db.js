@@ -1,6 +1,7 @@
 const { Client } = require('pg');
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
+const connectionString =
+  process.env.DATABASE_URL || 'postgres://postgres:12345@localhost/vefforritun2';
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -29,7 +30,6 @@ async function query(sqlQuery, values = []) {
   } finally {
     await client.end();
   }
-
   return result;
 }
 
@@ -312,7 +312,6 @@ async function createBook({
     xss(language),
   ];
   const result = await query(queryString, values);
-
   return result;
 }
 

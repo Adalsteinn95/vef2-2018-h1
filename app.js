@@ -64,11 +64,11 @@ POST með notendanafni og lykilorði skilar token
 async function loginUser(req, res) {
   const { username, password } = req.body;
 
-  const user = await db.findByUsername(username);
+  const user = await db.findByUsername(username.toString());
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
   }
-  const passwordIsCorrect = await db.comparePasswords(password, user.password);
+  const passwordIsCorrect = await db.comparePasswords(password.toString(), user.password);
 
   if (passwordIsCorrect) {
     const token = getToken(user);

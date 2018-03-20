@@ -58,7 +58,7 @@ async function createBook(req, res) {
 
   if (validation.isEmpty()) {
     const result = await db.createBook(req.body);
-    return res.status(204).json();
+    return res.status(204).json(result);
   }
   const errors = validation.array();
   return res.status(404).json({ errors });
