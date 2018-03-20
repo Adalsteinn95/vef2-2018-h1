@@ -68,6 +68,7 @@ async function readAllUsers() {
 
   const queryString = 'SELECT * from Users';
 
+  console.info(queryString);
   const result = await query(queryString, null);
 
   return result.rows;
