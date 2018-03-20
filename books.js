@@ -5,11 +5,7 @@ const {
 } = require('express-validator/check');
 
 const db = require('./db');
-const {
-  requireAuthentication,
-  passport,
-} = require('./passport');
-
+const { requireAuthentication } = require('./passport');
 const router = express.Router();
 
 const {
@@ -45,7 +41,6 @@ const bookValidation = [
 GET skilar síðu af bókum
 */
 
-/* munum orugglegea ekki vilja hafa thetta svona */
 async function getAllBooks(req, res) {
   const {
     search,
