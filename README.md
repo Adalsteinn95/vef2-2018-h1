@@ -8,7 +8,7 @@ _____________
 Þú þarft að hafa Node uppsett hjá þér.
 ```bash
 #fyrir linux
-> sudo apt-get install node 
+> sudo apt-get install nodejs
 
 #fyrir mac
 > brew install node
@@ -45,7 +45,7 @@ Síðan eru keyrðar eftirfarandi skipanir til að setja upp gagnagrunn og gögn
 
 ```bash
 #býr til db
-node createdb
+node createdb.js
 
 #setur inn gögn í db
 node init
@@ -179,8 +179,7 @@ node init
   - `GET` skilar _síðu_ af flokkum
   ```
   curl -X GET \
-  http://localhost:3000/categories \
-  -H 'Authorization: Bearer {TOKEN}' 
+  http://localhost:3000/categories \ 
   ```
   - Skilar
   ```
@@ -220,8 +219,7 @@ node init
 
   ```
   curl -X GET \
-  http://localhost:3000/books \
-  -H 'Authorization: Bearer {TOKEN}' 
+  http://localhost:3000/books 
   ```
   - Skilar
   ```
@@ -275,7 +273,6 @@ node init
   ```
   curl -X GET \
   'http://localhost:3000/books?search=king&offset=0' \
-  -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' 
   ```
   - Skilar
@@ -304,7 +301,6 @@ node init
   ```
   curl -X GET \
   http://localhost:3000/books/1 \
-  -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' 
   ```
   - Skilar 

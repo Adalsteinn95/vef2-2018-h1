@@ -142,7 +142,6 @@ POST býr til nýjan lestur á bók og skilar
 */
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  
   const { bookID, rating, ratingtext = '' } = req.body;
   if (bookID == null) {
     return res.status(404).json({ error: 'bookID má ekki vera tómt' });
