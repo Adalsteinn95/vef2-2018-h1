@@ -4,11 +4,7 @@ const passport = require('passport');
 
 const db = require('./db');
 
-const {
-  PORT: port = 3000,
-  JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 600000000000000000000000000000000000000000000000000000000000000000000000,
-} = process.env;
+const { JWT_SECRET: jwtSecret, TOKEN_LIFETIME: tokenLifetime = 60000000000000000000 } = process.env;
 
 if (!jwtSecret) {
   console.error('JWT_SECRET not registered in .env');
@@ -33,13 +29,13 @@ async function strat(data, next) {
 passport.use(new Strategy(jwtOptions, strat));
 
 function requireAuthentication(req, res, next) {
+  // eslint-disable-next-line
   return passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) {
       return next(err);
     }
 
     if (!user) {
-      console.log(err, user, info);
       const error = info.name === 'TokenExpiredError' ? 'expired token' : 'invalid token';
       return res.status(401).json({ error });
     }

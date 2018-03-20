@@ -142,7 +142,7 @@ async function alterUser({ id, name, password } = {}) {
 
 /**
  * Read all Categories asynchronously.
- * 
+ *
  * @param {number} offset - offset on page
  *
  * @returns {Promise} Promise representing an array of all categories object
