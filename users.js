@@ -39,7 +39,7 @@ async function getUsers(req, res) {
     };
   });
 
-  return res.json({ finalResult });
+  return res.json(finalResult);
 }
 
 /*
