@@ -12,9 +12,11 @@ _____________
 
 #fyrir mac
 > brew install node
+```
 
+```powershell
 #fyrir windows
-> rm -rf ~ 
+> Remove-Item -Recurse -Force some_dir
 ```
 
 ## Uppsetning
