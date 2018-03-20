@@ -14,10 +14,9 @@ cloud.config({
  * @returns {Promise} result - object containing the information about the storage
  */
 async function upload(imageBuffer) {
-  
   const imageString = imageBuffer.toString('base64');
 
-  let result = await cloud.uploader.upload(`data:image/gif;base64,${imageString}`);
+  let result;
   try {
     result = await cloud.uploader.upload(`data:image/gif;base64,${imageString}`);
   } catch (error) {

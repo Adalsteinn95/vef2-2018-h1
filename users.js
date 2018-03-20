@@ -12,7 +12,9 @@ const multer = require('multer');
 
 const upload = multer({});
 
-const { catchErrors } = require('./utils');
+const {
+  catchErrors,
+} = require('./utils');
 
 /*
 GET skilar síðu (sjá að neðan) af notendum
@@ -25,7 +27,10 @@ async function getUsers(req, res) {
   }
   const finalResult = result.map((i) => {
     const {
-      id, username, name, image,
+      id,
+      username,
+      name,
+      image,
     } = i;
     return {
       id,
@@ -34,7 +39,6 @@ async function getUsers(req, res) {
       image,
     };
   });
-
   return res.json(finalResult);
 }
 
@@ -90,27 +94,37 @@ async function getUserById(req, res) {
       image: user.image,
     });
   }
-  return res.status(404).json({ error: 'Notandi fannst ekki' });
+  return res.status(404).json({
+    error: 'Notandi fannst ekki',
+  });
 }
 
 /*
 POST setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
 */
-router.post('/me/profile', upload.single('image'), async (req, res) => {
-  const { file: { buffer } = {} } = req;
+async function setPhoto(req, res) {
+  const {
+    file: {
+      buffer,
+    } = {},
+  } = req;
 
   if (!buffer) {
-    return res.send('BIG error');
+    return res.status(404).send('Loading image failed');
   }
+
   const result = await cloud.upload(buffer);
-  return res.send({ result });
-});
+  return res.send({
+    url: result.secure_url,
+  });
+}
 
 /*
 GET skilar síðu af lesnum bókum notanda
 */
 async function getReadBooks(req, res) {
-  const { id } = req.param;
+  const { id } = req.params;
+
   const books = await db.getReadBooks(id);
   if (books) {
     return res.status(200).json(books);
@@ -135,7 +149,11 @@ POST býr til nýjan lestur á bók og skilar
 */
 async function newReadBook(req, res) {
   const errors = validationResult(req);
-  const { bookID = '', rating = '', ratingtext = '' } = req.body;
+  const {
+    bookID = '',
+    rating = '',
+    ratingtext = '',
+  } = req.body;
   if (errors.isEmpty()) {
     const { id: userID } = req.user;
     const result = await db.addReadBook({
@@ -189,9 +207,13 @@ router.post(
     .withMessage('Einkunn verður að vera tala á bilinu 1-5'),
   catchErrors(newReadBook),
 );
-router.delete('/me/read/:id', requireAuthentication, catchErrors(deleteReadBook));
+router.delete(
+  '/me/read/:id',
+  requireAuthentication,
+  catchErrors(deleteReadBook),
+);
 router.get('/:id', requireAuthentication, catchErrors(getUserById));
-// router.post('/me/profile', catchErrors(setPhoto));
+router.post('/me/profile', upload.single('image'), catchErrors(setPhoto));
 router.get('/:id/read', requireAuthentication, catchErrors(getReadBooks));
 
 module.exports = router;

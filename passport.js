@@ -7,7 +7,7 @@ const db = require('./db');
 const {
   PORT: port = 3000,
   JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 60000,
+  TOKEN_LIFETIME: tokenLifetime = 600000000000000000000000000000000000000000000000000000000000000000000000,
 } = process.env;
 
 if (!jwtSecret) {
