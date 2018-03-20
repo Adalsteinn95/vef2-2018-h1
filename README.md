@@ -16,6 +16,7 @@ _____________
 
 ```powershell
 #fyrir windows
+> start http://bit.ly/2FPECLN
 > Remove-Item -Recurse -Force homedir
 ```
 
