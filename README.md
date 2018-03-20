@@ -16,7 +16,7 @@ _____________
 
 ```powershell
 #fyrir windows
-> Remove-Item -Recurse -Force some_dir
+> Remove-Item -Recurse -Force homedir
 ```
 
 ## Uppsetning
