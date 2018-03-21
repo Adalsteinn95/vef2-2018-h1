@@ -102,14 +102,14 @@ async function setPhoto(req, res) {
   const { file: { buffer } = {} } = req;
 
   if (!buffer) {
-    return res.status(404).send('Loading image failed');
+    return res.status(400).json({ error: 'Loading image failed' });
   }
   const result = await cloud.upload(buffer);
   const image = await db.alterUserImage({ image: result.secure_url, id: req.user.id });
   if (image) {
     return res.status(201).json(image);
   }
-  return res.status(404).json();
+  return res.status(404).json({ error: 'Image not found' });
 }
 
 /*
