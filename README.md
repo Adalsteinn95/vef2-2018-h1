@@ -54,7 +54,7 @@ node init
 ## Vefþjónustur
 
 * `/register`
-  - `POST` býr til notanda 
+  - `POST` býr til notanda
 
   ```
   curl -X POST \
@@ -66,16 +66,15 @@ node init
 	"name": "nafn"
   }'
   ```
-  - Skilar Notandanum sem þú bjóst til
-  ```
+  - Skilar notanda
+  ```
   {
     "username": "notandi",
     "name": "nafn"
   }
   ```
 * `/login`
-  - `POST` með notendanafni og lykilorði skilar token. 
-  - Sem þú þarft að nota sem Authorization.
+  - `POST` með notendanafni og lykilorði skilar token sem notar síðan sem authorization
   ```
   curl -X POST \
   http://localhost:3000/login \
@@ -86,7 +85,7 @@ node init
   }'
   ```
 
-  - Skilar token 
+  Skilar token
 
   ```
   {
@@ -94,7 +93,7 @@ node init
   }
   ```
 * `/users`
-  - `GET` skilar _síðu_ (sjá að neðan) af notendum
+  - `GET` skilar síðu af notendum
 
   ```
   curl -X GET \
@@ -102,7 +101,9 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' 
   ```
+
   - Skilar fylki af notendum
+
   ```
   [
     {
@@ -121,7 +122,7 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' \
   ```
-  - Skilar 
+  - Skilar notanda
   ```
   {
     "id": 1,
@@ -131,7 +132,7 @@ node init
   }
   ```
 * `/users/me`
-  - `GET` skilar innskráðum notanda 
+  - `GET` skilar innskráðum notanda
 
   ```
   curl -X GET \
@@ -160,27 +161,28 @@ node init
   }'
   ```
 * `/users/me/profile`
-  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð
+  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð af myndinni
   ```
   curl -X POST \
   http://localhost:3000/users/me/profile \
   -H 'Authorization: Bearer {TOKEN}' \
   -F 'image=@locationOfTheImage'
   ```
-  - Skilar URL af myndina
+  - Skilar URL
+
   ```
   {
     "url": "https://res.cloudinary.com/hckoju8k4/image/upload/v1521566673/p2likueqwkljz9gwxzie.jpg"
   }
   ```
 * `/categories`
-  - `GET` skilar _síðu_ af flokkum. Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 flokkunum og           - offset=20 sleppur fyrstu 20 flokkunum
+  - `GET` skilar _síðu_ af flokkum . Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 flokkunum og offset=20 sleppur fyrstu 20 flokkunum
   ```
   curl -X GET \
   http://localhost:3000/categories?offset=0 \ 
   ```
-  - Skilar flokkunum frá byrjun
-  ```
+  - Skilar flokkunum með offset 0
+  ```
   {
     "LIMIT": 10,
     "offsets": 0,
@@ -203,8 +205,8 @@ node init
 	"name": "Historic"
   }'
   ```
-  - Skilar nýja flokkinum
-  ```
+  - Skilar flokkinum
+  ```
   {
     "result": {
         "id": 13,
@@ -213,11 +215,11 @@ node init
   }
   ```
 * `/books`
-  - `GET` skilar _síðu_ af bókum. Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 bókunum og             -    offset=20 sleppur fyrstu 20 bókunum
+  - `GET` skilar _síðu_ af bókum. Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 bókunum og offset=20 sleppur fyrstu 20 bókunum
 
   ```
   curl -X GET \
-  http://localhost:3000/books?offset=0 
+  http://localhost:3000/books?offset=0
   ```
   - Skilar
   ```
@@ -258,16 +260,16 @@ node init
   - Skilar 
   ```
   {
-    "id": 538,
-    "title": "BookTitle",
-    "isbn13": "9783161484100",
-    "author": "",
-    "description": "",
-    "category": "Historic",
-    "isbn10": "0198526636",
-    "published": "",
-    "pagecount": 12,
-    "language": "en"
+      "id": 538,
+	  "title": "BookTitle",
+	  "isbn13": "9781402894626",
+      "author": "",
+      "description": "",
+	  "category": "Historic",
+      "isbn10": "0198526636",
+      "published": "",
+      "pagecount": 12,
+	  "language": "en"
   }
   ```
 * `/books?search=query`
@@ -277,7 +279,7 @@ node init
   'http://localhost:3000/books?search=king&offset=0' \
   -H 'Content-Type: application/json' 
   ```
-  - Skilar
+  - Skilar bókum sem innihalda 'king' 
   ```
   {
     "LIMIT": 10,
@@ -305,7 +307,7 @@ node init
   http://localhost:3000/books/1 \
   -H 'Content-Type: application/json' 
   ```
-  - Skilar 
+  - Skilar bók
   ```
   {
     "id": 1,
