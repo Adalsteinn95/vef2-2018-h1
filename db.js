@@ -1,7 +1,9 @@
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
-const { Client } = require('pg');
+const {
+  Client,
+} = require('pg');
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -30,26 +32,6 @@ async function query(sqlQuery, values = []) {
     await client.end();
   }
   return result;
-}
-
-/**
- * register a user asynchronously.
- *
- * @param {Object} user - user to register
- * @param {string} user.username - username of user
- * @param {string} user.password - password of user
- * @param {string} user.name - name of user
- *
- * @returns {Promise} Promise representing the object result of registered user
- */
-async function createUser({ username, password, name } = {}) {
-  const hashedPassword = await bcrypt.hash(password, 11);
-  const q =
-    'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING username,name';
-
-  const result = await query(q, [username, hashedPassword, name]);
-
-  return result.rows[0];
 }
 
 async function comparePasswords(hash, password) {
@@ -93,6 +75,37 @@ async function findByUsername(username) {
 }
 
 /**
+ * register a user asynchronously.
+ *
+ * @param {Object} user - user to register
+ * @param {string} user.username - username of user
+ * @param {string} user.password - password of user
+ * @param {string} user.name - name of user
+ *
+ * @returns {Promise} Promise representing the object result of registered user
+ */
+async function createUser({
+  username,
+  password,
+  name,
+} = {}) {
+  const hashedPassword = await bcrypt.hash(password, 11);
+  const q =
+    'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING username,name';
+
+  const check = await findByUsername(username);
+
+
+  if (check) {
+    return null;
+  }
+
+  const result = await query(q, [username, hashedPassword, name]);
+  return result.rows[0];
+}
+
+
+/**
  * Read a single user asynchronously
  *
  * @param {number} id - id of user
@@ -123,7 +136,11 @@ async function findById(id) {
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUser({ id, name, password } = {}) {
+async function alterUser({
+  id,
+  name,
+  password,
+} = {}) {
   /* todo útfæra */
   const hashedPassword = await bcrypt.hash(password, 11);
   const values = [xss(name), xss(hashedPassword), xss(id)];
@@ -149,7 +166,10 @@ async function alterUser({ id, name, password } = {}) {
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUserImage({ image, id } = {}) {
+async function alterUserImage({
+  image,
+  id,
+} = {}) {
   const values = [xss(image), xss(id)];
 
   const queryString = 'UPDATE users SET image = $1 WHERE id = $2 RETURNING image';
@@ -180,6 +200,24 @@ async function readAllCategories(offset) {
 }
 
 /**
+ * check if category exists
+ * @param {string} name
+ *
+ * @returns {Promise} Promise representing the result category
+ */
+async function categoriesExist(name) {
+  const q = 'SELECT * FROM Categories WHERE name = $1';
+
+  const result = await query(q, name);
+
+  if (result.rowCount === 1) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Create a category asynchronously.
  *
  * @param {string} name
@@ -190,9 +228,16 @@ async function readAllCategories(offset) {
 async function createCategory(name) {
   /* todo útfæra */
 
+
   const queryString = 'INSERT INTO Categories(name) VALUES($1) RETURNING *';
 
   const values = [name];
+
+  const check = await categoriesExist([name]);
+
+  if (check) {
+    return null;
+  }
 
   const result = await query(queryString, values);
 
@@ -236,6 +281,25 @@ async function getOneBook(id) {
 }
 
 /**
+ *  check if ISBN exists
+ *
+ * @param {string} isbn13
+ *
+ * @returns {Promise} Promise representing the result ISBN
+ */
+async function isbn13Check(isbn13) {
+  const q = 'SELECT * FROM Books WHERE ISBN13 = isbn13';
+
+  const result = query(q, [isbn13]);
+
+  if (result.rowCount === 1) {
+    return null;
+  }
+
+  return result.rows[0];
+}
+
+/**
  * update a book asynchronously.
  *
  * @param {Object} book - book to update
@@ -252,12 +316,17 @@ async function getOneBook(id) {
  *
  * @returns {Promise} Promise representing the object result of updating the book
  */
-async function alterBook(
-  id,
-  {
-    title, isbn10, isbn13, author, description, category, published, pagecount, language,
-  } = {},
-) {
+async function alterBook(id, {
+  title,
+  isbn10,
+  isbn13,
+  author,
+  description,
+  category,
+  published,
+  pagecount,
+  language,
+} = {} ) {
   const queryString =
     'UPDATE Books SET title = $1, ISBN13 = $2, author = $3, description = $4, category = $5, ISBN10 = $6, published = $7, pagecount = $8, language = $9 WHERE id = $10 RETURNING *';
 
@@ -278,6 +347,17 @@ async function alterBook(
     xss(language),
     id,
   ];
+  const checkISBN = await isbn13Check(xss(isbn13));
+  if (checkISBN) {
+    return { hasErrors: true, error: 'ISBN13' };
+  }
+
+  const checkCategory = await categoriesExist(xss(category));
+
+  if (checkCategory) {
+    return { hasErrors: true, error: 'Category' };
+  }
+
   const result = await query(queryString, values);
 
   if (result.rowCount === 0) {
@@ -336,6 +416,17 @@ async function createBook({
     pages,
     xss(language),
   ];
+
+  const checkISBN = await isbn13Check(xss(isbn13));
+  if (checkISBN) {
+    return { hasErrors: true, error: 'ISBN13' };
+  }
+
+  const checkCategory = await categoriesExist(xss(category));
+
+  if (checkCategory) {
+    return { hasErrors: true, error: 'Category' };
+  }
   const result = await query(queryString, values);
   return result.rows;
 }
@@ -361,6 +452,26 @@ async function getReadBooks(userID) {
 }
 
 /**
+ *  check if book exists
+ *
+ *
+ * @param {number} bookID
+ *
+ * @returns {Promise} Promise representing the result book
+ */
+async function getBookById(bookID) {
+  const q = 'SELECT * FROM BOOKS WHERE id = $1';
+
+  const result = query(q, [bookID]);
+
+  if (result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
+}
+
+/**
  * add read book
  *
  * @param {number} userID
@@ -371,12 +482,27 @@ async function getReadBooks(userID) {
  * @returns {Promise}  Promise representing of book
  */
 async function addReadBook({
-  userID, bookID, rating, ratingtext,
+  userID,
+  bookID,
+  rating,
+  ratingtext,
 } = {}) {
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
 
   const queryString =
     'INSERT into readBooks(userid, bookid, rating, ratingtext) VALUES ($1, $2, $3, $4) RETURNING *';
+
+  const checkUser = findById(xss(userID));
+
+  if (checkUser) {
+    return null;
+  }
+
+  const checkBook = getBookById(xss(bookID));
+
+  if (checkBook) {
+    return null;
+  }
 
   const result = await query(queryString, values);
 
