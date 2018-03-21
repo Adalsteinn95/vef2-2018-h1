@@ -275,7 +275,6 @@ async function isbn13Check(isbn13) {
   const q = 'SELECT * FROM Books WHERE ISBN13 = $1';
 
   const result = await query(q, [isbn13]);
-  console.log(result);
   if (result.rowCount === 1) {
     return true;
   }
@@ -468,7 +467,7 @@ async function getReadBooks(userID) {
 async function getBookById(bookID) {
   const q = 'SELECT * FROM BOOKS WHERE id = $1';
 
-  const result = query(q, [bookID]);
+  const result = await query(q, [bookID]);
 
   if (result.rowCount === 1) {
     return result.rows[0];
@@ -546,7 +545,7 @@ async function search(title, description, offset) {
     'SELECT * from Books WHERE to_tsvector(title) @@ to_tsquery($1) OR to_tsvector(description) @@ to_tsquery($2) ORDER BY title LIMIT 10 OFFSET $3';
   const values = [xss(title), xss(description), xss(offset.toString())];
 
-  const result = query(queryString, values);
+  const result = await query(queryString, values);
 
   return result;
 }
