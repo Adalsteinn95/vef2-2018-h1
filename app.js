@@ -51,7 +51,7 @@ async function createCategory(req, res) {
   }
   return db.createCategory(xss(name).toString()).then((result) => {
     if (result) {
-      return res.status(201).json({ result });
+      return res.status(201).json(result);
     }
     return res.status(400).json({ error: 'Flokkur er nú þegar til' });
   });

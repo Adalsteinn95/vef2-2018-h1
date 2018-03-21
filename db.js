@@ -193,9 +193,7 @@ async function readAllCategories(offset) {
  */
 async function categoriesExist(name) {
   const q = 'SELECT * FROM Categories WHERE name = $1';
-
   const result = await query(q, [name]);
-
   if (result.rowCount === 1) {
     return true;
   }
@@ -218,8 +216,7 @@ async function createCategory(name) {
 
   const values = [name];
 
-  const check = await categoriesExist([name]);
-
+  const check = await categoriesExist(name);
   if (check) {
     return null;
   }
@@ -486,8 +483,7 @@ async function getReadBooks(userID) {
 
   const values = [xss(userID)];
 
-  const queryString =
-    'SELECT * from books WHERE id IN (SELECT bookid from readBooks where userid = $1)';
+  const queryString = 'SELECT * from readBooks where userid = $1';
 
   const result = await query(queryString, values);
 
@@ -532,16 +528,11 @@ async function addReadBook({
   const queryString =
     'INSERT into readBooks(userid, bookid, rating, ratingtext) VALUES ($1, $2, $3, $4) RETURNING *';
 
-  const checkUser = findById(xss(userID));
+  const checkBook = await getBookById(xss(bookID));
+  console.log(checkBook);
 
-  if (checkUser) {
-    return null;
-  }
-
-  const checkBook = getBookById(xss(bookID));
-
-  if (checkBook) {
-    return null;
+  if (!checkBook) {
+    return { hasErrors: true, error: 'Bókin er ekki til' };
   }
 
   const result = await query(queryString, values);

@@ -42,13 +42,13 @@ GET skilar innskráðum notanda (þ.e.a.s. þér)
 */
 async function getMe(req, res) {
   const {
-    id, name, username, profile,
+    id, name, username, image,
   } = req.user;
   return res.json({
     id,
     name,
     username,
-    profile,
+    image,
   });
 }
 
@@ -60,7 +60,7 @@ async function patchUser(req, res) {
   const errors = validationResult(req);
   if (errors.isEmpty()) {
     const { id } = req.user;
-    const { name, password } = req.body;
+    const { name = '', password = '' } = req.body;
     await db.alterUser({
       id,
       name: xss(name.toString()),
@@ -157,9 +157,8 @@ async function newReadBook(req, res) {
       rating: Number(rating),
       ratingtext: xss(ratingtext.toString()),
     });
-    // ATH CHECKA
     if (result.hasErrors) {
-      return res.status(400).json({ errors: `${result.error} fannst ekki` });
+      return res.status(404).json({ error: result.error });
     }
     return res.status(200).json(result);
   }
