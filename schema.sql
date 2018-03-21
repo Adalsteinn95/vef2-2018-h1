@@ -32,3 +32,5 @@ CREATE TABLE readBooks(
     rating       INTEGER    NOT NULL CHECK (rating BETWEEN 1 AND 5),
     ratingtext   text
 );
+
+UPDATE users SET name = COALESCE(null, name), password = COALESCE('hahahaha', password) WHERE id = 1 RETURNING *;
