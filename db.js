@@ -445,7 +445,6 @@ async function createBook({
   ];
 
   const checkISBN = await isbn13Check(xss(isbn13));
-  console.log(checkISBN);
   if (checkISBN) {
     return {
       hasErrors: true,
