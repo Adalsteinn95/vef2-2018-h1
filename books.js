@@ -120,7 +120,8 @@ async function createBook(req, res) {
     if (result.hasErrors) {
       return res.status(400).json({ error: result.error });
     }
-    return res.status(204).json(result);
+    console.info(result);
+    return res.status(200).json(result);
   }
   const errors = validation.array();
   return res.status(404).json({

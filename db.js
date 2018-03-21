@@ -468,7 +468,7 @@ async function createBook({
     };
   }
   const result = await query(queryString, values);
-  return result.rows;
+  return result.rows[0];
 }
 
 /**
@@ -529,7 +529,6 @@ async function addReadBook({
     'INSERT into readBooks(userid, bookid, rating, ratingtext) VALUES ($1, $2, $3, $4) RETURNING *';
 
   const checkBook = await getBookById(xss(bookID));
-  console.log(checkBook);
 
   if (!checkBook) {
     return { hasErrors: true, error: 'Bókin er ekki til' };

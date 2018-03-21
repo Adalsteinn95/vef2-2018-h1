@@ -51,6 +51,7 @@ node createdb.js
 node init
 ```
 
+Tekur smá tíma þar sem þetta er gert sync
 ## Vefþjónustur
 
 * `/register`
@@ -161,7 +162,7 @@ node init
   }'
   ```
 * `/users/me/profile`
-  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð af myndinni
+  - `POST` setur eða uppfærir mynd fyrir notanda í gegnum Cloudinary og skilar slóð af myndinni ásamt því að vista hana fyrir viðeigandi notanda
   ```
   curl -X POST \
   http://localhost:3000/users/me/profile \
@@ -279,7 +280,7 @@ node init
   'http://localhost:3000/books?search=king&offset=0' \
   -H 'Content-Type: application/json' 
   ```
-  - Skilar bókum sem innihalda 'king' 
+  - Skilar bókum sem innihalda 'king' í titli eða lýsingu
   ```
   {
     "LIMIT": 10,
@@ -301,13 +302,13 @@ node init
   }
   ```
 * `/books/:id`
-  - `GET` skilar stakri bók
+  - `GET` skilar stakri bók út frá id
   ```
   curl -X GET \
   http://localhost:3000/books/1 \
   -H 'Content-Type: application/json' 
   ```
-  - Skilar bók
+  - Skilar bók sem hefur id=1
   ```
   {
     "id": 1,
@@ -322,37 +323,40 @@ node init
     "language": "en"
   }
   ```
-  - `PATCH` uppfærir bók
+  - `PATCH` uppfærir bók. Getur uppfært eftirfarandi hluti
+    - title  
+    - isbn10  
+    - isbn13  
+    - author  
+    - description  
+    - category  
+    - published  
+    - pagecount  
+    - language  
   ```
   curl -X PATCH \
   http://localhost:3000/books/1 \
-  -H 'Authorization: Bearer {TOKEN}' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNTIxNjYzMzc3LCJleHAiOjYwMDAwMDAwMDAxNTIxNjYwMDAwfQ.uqq5HRzCgS-KzIpdzabE0Pvytrspeoaui-UZqMWNq-w' \
   -H 'Content-Type: application/json' \
   -d '{
-    "title": "1984",
-    "isbn13": "9780451524935",
-    "author": "George Orwell",
-    "description": "Winston Smith is a worker at the Ministry of Truth, where he falsifies records for the party. Secretly subversive, he and his colleague Julia try to free themselves from political slavery but the price of freedom is betrayal.",
-    "category": "Science Fiction",
-    "isbn10": "0451524934",
-    "published": "",
-    "pagecount": 304,
-    "language": "is"
+	  "title": "BookTitle12",
+	  "author": "me"
+	  
   }'
   ```
-  - Skilar
+  - Skilar bókinni með uppfærðar upplýsingar
   ```
   {
     "id": 1,
-    "title": "1984",
+    "title": "BookTitle12",
     "isbn13": "9780451524935",
-    "author": "George Orwell",
+    "author": "me",
     "description": "Winston Smith is a worker at the Ministry of Truth, where he falsifies records for the party. Secretly subversive, he and his colleague Julia try to free themselves from political slavery but the price of freedom is betrayal.",
     "category": "Science Fiction",
     "isbn10": "0451524934",
     "published": "",
-    "pagecount": 304,
-    "language": "is"
+    "pagecount": 246,
+    "language": "en"
   }
   ```
 * `/users/:id/read`
@@ -372,7 +376,7 @@ node init
   ```
   curl -X GET \
   http://localhost:3000/users/2/read \
-  -H 'Authorization: Bearer   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNTIxNTYzMjg1 LCJleHAiOjZlKzcxfQ.jUaWNacsbOb0IbNrIAX0e068EglTJQ0WruHlE5Jiyfc' \
+  -H 'Authorization: Bearer   {TOKEN}' \
     -H 'Cache-Control: no-cache' \
     -H 'Content-Type: application/json' \
     -H 'Postman-Token: 512613dc-f8d2-49ab-accc-fe673de90c6e' \
@@ -383,20 +387,13 @@ node init
   ```
   - Skilar
   ```
-  [
-    {
-        "id": 2,
-        "title": "1Q84",
-        "isbn13": "9780307593313",
-        "author": "Haruki Murakami",
-        "description": "The internationally best-selling and award-winning author of such works as What I Talk About When I Talk About Running presents a psychologically charged tale that draws on Orwellian themes. 100,000 first printing.",
-        "category": "Fiction",
-        "isbn10": "0307593312",
-        "published": "2011",
-        "pagecount": 925,
-        "language": "en"
-    }
-  ]
+  {
+    "id": 1,
+    "userid": 2,
+    "bookid": 2,
+    "rating": 1,
+    "ratingtext": ""
+  }
   ```
   - `POST` býr til nýjan lestur á bók og skilar
   ```
@@ -420,7 +417,7 @@ node init
   }
   ```
 * `/users/me/read/:id`
-  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda
+  - `DELETE` eyðir lestri bókar fyrir innskráðann notanda. 
 
   ```
   curl -X DELETE \
@@ -432,12 +429,12 @@ _____
 
 # Meðlimir Weather CO.
 
-## Þjálfari**(CEO) - Fannar G. Guðmundsson [Github](https://github.com/fgg2)
+## Þjálfari**(CEO) - Fannar G. Guðmundsson (fgg2@hi.is) [Github](https://github.com/fgg2)
 * Er í forystu og leiðbeinir á fundum þar sem hópurinn er að forrita og hanna. 
 * Þjálfarinn hefur yfirsýn yfir hvernig teyminu gengur og hvetur aðra áfram. 
 * Þjálfarinn passar upp á að teymið vinni eftir góðri aðferð. 
 
-## Kóða- og hönnunarstjóri**(CTO) - Aðalsteinn I. Pálsson [Github](https://github.com/Adalsteinn95)
+## Kóða- og hönnunarstjóri**(CTO) - Aðalsteinn I. Pálsson (aip7@hi.is) [Github](https://github.com/Adalsteinn95) 
 * Sér um útgáfu stjórnun, setur kóðastaðla, stýrir paraforritun. 
 * Sér um að kóði sé rýndur og samþykkir Git branch í master. 
 * Gefur út hugbúnaðinn. Hjálpar öðrum með einingaprófanir eða aðrar prófanir. 
