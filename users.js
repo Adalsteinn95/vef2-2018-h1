@@ -156,6 +156,10 @@ async function newReadBook(req, res) {
       rating: Number(rating),
       ratingtext: xss(ratingtext.toString()),
     });
+    // ATH CHECKA
+    if (result.hasErrors) {
+      return res.status(400).json({ errors: `${result.error} fannst ekki` });
+    }
     return res.status(200).json(result);
   }
   return res.status(404).json({ errors: errors.array() });
@@ -171,7 +175,7 @@ async function deleteReadBook(req, res) {
   if (result) {
     return res.status(204).json();
   }
-  return res.status(404);
+  return res.status(404).json({ error: 'Bók fannst ekki' });
 }
 
 router.get('/', requireAuthentication, catchErrors(getUsers));
