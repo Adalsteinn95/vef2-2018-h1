@@ -49,7 +49,12 @@ async function createCategory(req, res) {
     const errorMessages = errors.array().map(i => ({ field: i.param, message: i.msg }));
     return res.status(404).json({ errorMessages });
   }
-  return db.createCategory(xss(name).toString()).then(result => res.status(201).json({ result }));
+  return db.createCategory(xss(name).toString()).then((result) => {
+    if (result) {
+      return res.status(201).json({ result });
+    }
+    return res.status(400).json({ error: 'Flokkur er núþegar til' });
+  });
 }
 
 /*
@@ -68,7 +73,12 @@ async function registerUser(req, res) {
     return res.status(404).json({ errorMessages });
   }
 
-  return db.createUser(data).then(result => res.status(201).json(result));
+  return db.createUser(data).then((result) => {
+    if (result) {
+      return res.status(201).json(result);
+    }
+    return res.status(400).json({ error: 'Notandi er nú þegar til' });
+  });
 }
 
 /*
