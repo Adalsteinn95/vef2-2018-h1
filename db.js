@@ -1,9 +1,7 @@
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
-const {
-  Client,
-} = require('pg');
+const { Client } = require('pg');
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -84,11 +82,7 @@ async function findByUsername(username) {
  *
  * @returns {Promise} Promise representing the object result of registered user
  */
-async function createUser({
-  username,
-  password,
-  name,
-} = {}) {
+async function createUser({ username, password, name } = {}) {
   const hashedPassword = await bcrypt.hash(password, 11);
   const q =
     'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING username,name';
@@ -134,16 +128,13 @@ async function findById(id) {
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUser({
-  id = null,
-  name = null,
-  password = null,
-} = {}) {
+async function alterUser({ id = null, name = null, password = null } = {}) {
   /* todo útfæra */
   const hashedPassword = await bcrypt.hash(password, 11);
   const values = [xss(name), xss(hashedPassword), xss(id)];
 
-  const queryString = 'UPDATE users SET name = COALESCE($1, name), password = COALESCE($2, password) WHERE id = $3 RETURNING *';
+  const queryString =
+    'UPDATE users SET name = COALESCE($1, name), password = COALESCE($2, password) WHERE id = $3 RETURNING *';
 
   const result = await query(queryString, values);
 
@@ -164,10 +155,7 @@ async function alterUser({
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUserImage({
-  image,
-  id,
-} = {}) {
+async function alterUserImage({ image, id } = {}) {
   const values = [xss(image), xss(id)];
 
   const queryString = 'UPDATE users SET image = $1 WHERE id = $2 RETURNING image';
@@ -329,17 +317,20 @@ async function titleCheck(title) {
  *
  * @returns {Promise} Promise representing the object result of updating the book
  */
-async function alterBook(id, {
-  title = null,
-  isbn10 = null,
-  isbn13 = null,
-  author = null,
-  description = null,
-  category = null,
-  published = null,
-  pagecount = null,
-  language = null,
-} = {}) {
+async function alterBook(
+  id,
+  {
+    title = null,
+    isbn10 = null,
+    isbn13 = null,
+    author = null,
+    description = null,
+    category = null,
+    published = null,
+    pagecount = null,
+    language = null,
+  } = {},
+) {
   const queryString =
     'UPDATE Books SET title = COALESCE($1, title), ISBN13 = COALESCE($2, ISBN13), author = COALESCE($3, author), description = COALESCE($4, description), category = COALESCE($5, category), ISBN10 = COALESCE($6, ISBN10), published = COALESCE($7, published), pagecount = COALESCE($8, pagecount), language = COALESCE($9, language) WHERE id = $10 RETURNING *';
 
@@ -349,43 +340,55 @@ async function alterBook(id, {
     pages = null;
   }
   const values = [
-    xss(title),
-    xss(isbn13),
-    xss(author),
-    xss(description),
-    xss(category),
-    xss(isbn10),
-    xss(published),
+    title,
+    isbn13,
+    author,
+    description,
+    category,
+    isbn10,
+    published,
     pages,
-    xss(language),
+    language,
     id,
   ];
-  const checkISBN = await isbn13Check(xss(isbn13));
-  if (checkISBN) {
-    return {
-      hasErrors: true,
-      error: 'ISBN13 er nú þegar til',
-    };
+
+  const xssValues = values.map((val) => {
+    if (val !== null || typeof val === 'number') {
+      return xss(val);
+    }
+    return val;
+  });
+
+  if (isbn13) {
+    const checkISBN = await isbn13Check(xss(isbn13));
+    if (checkISBN) {
+      return {
+        hasErrors: true,
+        error: 'ISBN13 er nú þegar til',
+      };
+    }
+  }
+  if (title) {
+    const checkTitle = await titleCheck(xss(title));
+    if (checkTitle) {
+      return {
+        hasErrors: true,
+        error: 'Titill er nú þegar til',
+      };
+    }
   }
 
-  const checkTitle = await titleCheck(xss(title));
-  if (checkTitle) {
-    return {
-      hasErrors: true,
-      error: 'Titill er nú þegar til',
-    };
+  if (category) {
+    const checkCategory = await categoriesExist(xss(category));
+    if (!checkCategory) {
+      return {
+        hasErrors: true,
+        error: 'Category er ekki til',
+      };
+    }
   }
 
-  const checkCategory = await categoriesExist(xss(category));
-
-  if (!checkCategory) {
-    return {
-      hasErrors: true,
-      error: 'Category er ekki til',
-    };
-  }
-
-  const result = await query(queryString, values);
+  const result = await query(queryString, xssValues);
 
   if (result.rowCount === 0) {
     return null;
@@ -522,10 +525,7 @@ async function getBookById(bookID) {
  * @returns {Promise}  Promise representing of book
  */
 async function addReadBook({
-  userID,
-  bookID,
-  rating,
-  ratingtext,
+  userID, bookID, rating, ratingtext,
 } = {}) {
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
 
