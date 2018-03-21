@@ -54,7 +54,7 @@ node init
 ## Vefþjónustur
 
 * `/register`
-  - `POST` býr til notanda og skilar án lykilorðs hash
+  - `POST` býr til notanda 
 
   ```
   curl -X POST \
@@ -66,14 +66,17 @@ node init
 	"name": "nafn"
   }'
   ```
-  ```
+  - Skilar Notandanum sem þú
+  - bjóst til
+  ```
   {
     "username": "notandi",
     "name": "nafn"
   }
   ```
 * `/login`
-  - `POST` með notendanafni og lykilorði skilar token
+  - `POST` með notendanafni og lykilorði skilar token. 
+  - Sem þú þarft að nota sem Authorization.
   ```
   curl -X POST \
   http://localhost:3000/login \
@@ -84,7 +87,7 @@ node init
   }'
   ```
 
-  Skilar
+  - Skilar token 
 
   ```
   {
@@ -93,7 +96,6 @@ node init
   ```
 * `/users`
   - `GET` skilar _síðu_ (sjá að neðan) af notendum
-  - Lykilorðs hash skal ekki vera sýnilegt
 
   ```
   curl -X GET \
@@ -101,9 +103,7 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' 
   ```
-
-  - Skilar
-
+  - Skilar fylki af notendum
   ```
   [
     {
@@ -132,7 +132,7 @@ node init
   }
   ```
 * `/users/me`
-  - `GET` skilar innskráðum notanda (þ.e.a.s. _þér_)
+  - `GET` skilar innskráðum notanda 
 
   ```
   curl -X GET \
@@ -140,7 +140,7 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' 
   ```
-  - Skilar
+  - Skilar notanda
   ```
   {
     "id": 1,
@@ -148,7 +148,7 @@ node init
     "username": "notandi"
   }
   ```
-  - `PATCH` uppfærir sendar upplýsingar um notanda fyrir utan notendanafn, þ.e.a.s. nafn eða lykilorð, ef þau eru gild
+  - `PATCH` uppfærir sendar upplýsingar um notanda fyrir utan notendanafn, getur verið nafn eða lykilorð, ef þau eru gild
 
   ```
   curl -X PATCH \
@@ -156,8 +156,8 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -H 'Content-Type: application/json' \
   -d '{
-	"password": "lalala",
-	"name": "breyting"
+	  "password": "lalala",
+	  "name": "breyting"
   }'
   ```
 * `/users/me/profile`
@@ -168,21 +168,20 @@ node init
   -H 'Authorization: Bearer {TOKEN}' \
   -F 'image=@locationOfTheImage'
   ```
-  - Skilar
-
+  - Skilar URL af myndina
   ```
   {
     "url": "https://res.cloudinary.com/hckoju8k4/image/upload/v1521566673/p2likueqwkljz9gwxzie.jpg"
   }
   ```
 * `/categories`
-  - `GET` skilar _síðu_ af flokkum
+  - `GET` skilar _síðu_ af flokkum. Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 flokkunum og           - offset=20 sleppur fyrstu 20 flokkunum
   ```
   curl -X GET \
-  http://localhost:3000/categories \ 
+  http://localhost:3000/categories?offset=0 \ 
   ```
-  - Skilar
-  ```
+  - Skilar flokkunum frá byrjun
+  ```
   {
     "LIMIT": 10,
     "offsets": 0,
@@ -205,8 +204,8 @@ node init
 	"name": "Historic"
   }'
   ```
-  - Skilar
-  ```
+  - Skilar nýja flokkinum
+  ```
   {
     "result": {
         "id": 13,
@@ -215,11 +214,11 @@ node init
   }
   ```
 * `/books`
-  - `GET` skilar _síðu_ af bókum
+  - `GET` skilar _síðu_ af bókum. Offset segir til um hvaða síða er birt. offset=10 sleppur fyrstu 10 bókunum og             -    offset=20 sleppur fyrstu 20 bókunum
 
   ```
   curl -X GET \
-  http://localhost:3000/books 
+  http://localhost:3000/books?offset=0 
   ```
   - Skilar
   ```
@@ -260,16 +259,20 @@ node init
   - Skilar 
   ```
   {
-	  "title": "BookTitle",
-	  "isbn13": "9781402894626",
-	  "isbn10": "0198526636",
-	  "category": "Historic",
-	  "pagecount": 12,
-	  "language": "en"
+    "id": 538,
+    "title": "BookTitle",
+    "isbn13": "9783161484100",
+    "author": "",
+    "description": "",
+    "category": "Historic",
+    "isbn10": "0198526636",
+    "published": "",
+    "pagecount": 12,
+    "language": "en"
   }
   ```
 * `/books?search=query`
-  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði, sjá að neðan
+  - `GET` skilar _síðu_ af bókum sem uppfylla leitarskilyrði. Offset segir til um hvaða síða er birt. offset=10 sleppur       -  fyrstu 10 bókunum og offset=20 sleppur fyrstu 20 bókunum
   ```
   curl -X GET \
   'http://localhost:3000/books?search=king&offset=0' \
