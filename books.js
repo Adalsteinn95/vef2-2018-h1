@@ -82,9 +82,8 @@ async function createBook(req, res) {
 
   if (validation.isEmpty()) {
     const result = await db.createBook(req.body);
-    // ATH CHECKA
     if (result.hasErrors) {
-      return res.status(400).json({ error: `${result.error} er nú þegar til` });
+      return res.status(400).json({ error: result.error });
     }
     return res.status(204).json(result);
   }
@@ -119,9 +118,8 @@ async function patchBook(req, res) {
 
   if (validation.isEmpty()) {
     const result = await db.alterBook(id, req.body);
-    // ATH CHECKA
     if (result.hasErrors) {
-      return res.status(400).json({ error: `${result.error} er nú þegar til` });
+      return res.status(400).json({ error: result.error });
     }
     return res.status(200).json(result);
   }

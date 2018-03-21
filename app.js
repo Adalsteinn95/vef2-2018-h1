@@ -53,7 +53,7 @@ async function createCategory(req, res) {
     if (result) {
       return res.status(201).json({ result });
     }
-    return res.status(400).json({ error: 'Flokkur er núþegar til' });
+    return res.status(400).json({ error: 'Flokkur er nú þegar til' });
   });
 }
 

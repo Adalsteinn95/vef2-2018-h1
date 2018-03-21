@@ -1,9 +1,7 @@
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
-const {
-  Client,
-} = require('pg');
+const { Client } = require('pg');
 
 const bcrypt = require('bcrypt');
 const xss = require('xss');
@@ -84,17 +82,12 @@ async function findByUsername(username) {
  *
  * @returns {Promise} Promise representing the object result of registered user
  */
-async function createUser({
-  username,
-  password,
-  name,
-} = {}) {
+async function createUser({ username, password, name } = {}) {
   const hashedPassword = await bcrypt.hash(password, 11);
   const q =
     'INSERT INTO Users (username, password, name) VALUES ($1, $2, $3) RETURNING username,name';
 
   const check = await findByUsername(username);
-
 
   if (check) {
     return null;
@@ -103,7 +96,6 @@ async function createUser({
   const result = await query(q, [username, hashedPassword, name]);
   return result.rows[0];
 }
-
 
 /**
  * Read a single user asynchronously
@@ -136,11 +128,7 @@ async function findById(id) {
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUser({
-  id,
-  name,
-  password,
-} = {}) {
+async function alterUser({ id, name, password } = {}) {
   /* todo útfæra */
   const hashedPassword = await bcrypt.hash(password, 11);
   const values = [xss(name), xss(hashedPassword), xss(id)];
@@ -166,10 +154,7 @@ async function alterUser({
  * @returns {Promise} Promise representing the new version of the user object
  *
  */
-async function alterUserImage({
-  image,
-  id,
-} = {}) {
+async function alterUserImage({ image, id } = {}) {
   const values = [xss(image), xss(id)];
 
   const queryString = 'UPDATE users SET image = $1 WHERE id = $2 RETURNING image';
@@ -208,7 +193,7 @@ async function readAllCategories(offset) {
 async function categoriesExist(name) {
   const q = 'SELECT * FROM Categories WHERE name = $1';
 
-  const result = await query(q, name);
+  const result = await query(q, [name]);
 
   if (result.rowCount === 1) {
     return true;
@@ -227,7 +212,6 @@ async function categoriesExist(name) {
 
 async function createCategory(name) {
   /* todo útfæra */
-
 
   const queryString = 'INSERT INTO Categories(name) VALUES($1) RETURNING *';
 
@@ -275,7 +259,7 @@ async function getOneBook(id) {
   const queryString = 'SELECT * from books WHERE id = $1';
   const values = [xss(id)];
 
-  const result = query(queryString, values);
+  const result = await query(queryString, values);
 
   return result;
 }
@@ -288,15 +272,32 @@ async function getOneBook(id) {
  * @returns {Promise} Promise representing the result ISBN
  */
 async function isbn13Check(isbn13) {
-  const q = 'SELECT * FROM Books WHERE ISBN13 = isbn13';
+  const q = 'SELECT * FROM Books WHERE ISBN13 = $1';
 
-  const result = query(q, [isbn13]);
+  const result = await query(q, [isbn13]);
+  console.log(result);
+  if (result.rowCount === 1) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ *  check if title exists
+ *
+ * @param {string} title
+ *
+ * @returns {Promise} Promise representing the result ISBN
+ */
+async function titleCheck(title) {
+  const q = 'SELECT * FROM Books WHERE title = $1';
+
+  const result = await query(q, [title]);
 
   if (result.rowCount === 1) {
-    return null;
+    return true;
   }
-
-  return result.rows[0];
+  return false;
 }
 
 /**
@@ -316,17 +317,12 @@ async function isbn13Check(isbn13) {
  *
  * @returns {Promise} Promise representing the object result of updating the book
  */
-async function alterBook(id, {
-  title,
-  isbn10,
-  isbn13,
-  author,
-  description,
-  category,
-  published,
-  pagecount,
-  language,
-} = {} ) {
+async function alterBook(
+  id,
+  {
+    title, isbn10, isbn13, author, description, category, published, pagecount, language,
+  } = {},
+) {
   const queryString =
     'UPDATE Books SET title = $1, ISBN13 = $2, author = $3, description = $4, category = $5, ISBN10 = $6, published = $7, pagecount = $8, language = $9 WHERE id = $10 RETURNING *';
 
@@ -349,13 +345,18 @@ async function alterBook(id, {
   ];
   const checkISBN = await isbn13Check(xss(isbn13));
   if (checkISBN) {
-    return { hasErrors: true, error: 'ISBN13' };
+    return { hasErrors: true, error: 'ISBN13 er nú þegar til' };
+  }
+
+  const checkTitle = await titleCheck(xss(title));
+  if (checkTitle) {
+    return { hasErrors: true, error: 'Titill er nú þegar til' };
   }
 
   const checkCategory = await categoriesExist(xss(category));
 
-  if (checkCategory) {
-    return { hasErrors: true, error: 'Category' };
+  if (!checkCategory) {
+    return { hasErrors: true, error: 'Category er ekki til' };
   }
 
   const result = await query(queryString, values);
@@ -418,14 +419,19 @@ async function createBook({
   ];
 
   const checkISBN = await isbn13Check(xss(isbn13));
+  console.log(checkISBN);
   if (checkISBN) {
-    return { hasErrors: true, error: 'ISBN13' };
+    return { hasErrors: true, error: 'ISBN13 er nú þegar til' };
+  }
+  const checkTitle = await titleCheck(xss(title));
+  if (checkTitle) {
+    return { hasErrors: true, error: 'Titill er nú þegar til' };
   }
 
   const checkCategory = await categoriesExist(xss(category));
 
-  if (checkCategory) {
-    return { hasErrors: true, error: 'Category' };
+  if (!checkCategory) {
+    return { hasErrors: true, error: 'Category er ekki til' };
   }
   const result = await query(queryString, values);
   return result.rows;
@@ -482,10 +488,7 @@ async function getBookById(bookID) {
  * @returns {Promise}  Promise representing of book
  */
 async function addReadBook({
-  userID,
-  bookID,
-  rating,
-  ratingtext,
+  userID, bookID, rating, ratingtext,
 } = {}) {
   const values = [xss(userID), xss(bookID), xss(rating), xss(ratingtext)];
 
