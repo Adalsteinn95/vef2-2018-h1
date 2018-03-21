@@ -66,8 +66,7 @@ node init
 	"name": "nafn"
   }'
   ```
-  - Skilar Notandanum sem þú
-  - bjóst til
+  - Skilar Notandanum sem þú bjóst til
   ```
   {
     "username": "notandi",
