@@ -184,11 +184,13 @@ router.get('/me', requireAuthentication, catchErrors(getMe));
 router.patch(
   '/me',
   check('password')
+    .optional()
     .isLength({
       min: 6,
     })
     .withMessage('Lykilorð verður að vera amk 6 stafir'),
   check('name')
+    .optional()
     .isLength({ min: 1 })
     .withMessage('Nafn má ekki vera tómt'),
   requireAuthentication,
