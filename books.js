@@ -37,6 +37,41 @@ const bookValidation = [
     })
     .withMessage('Tungumál verður að vera tveggja stafa strengur'),
 ];
+const bookPatchValidation = [
+  check('title')
+    .optional()
+    .isLength({
+      min: 1,
+    })
+    .withMessage('Titill bókar má ekki vera tómur'),
+  check('category')
+    .optional()
+    .isLength({
+      min: 1,
+    })
+    .withMessage('Flokkur bókar má ekki vera tómur'),
+  check('isbn13')
+    .optional()
+    .isISBN(13)
+    .withMessage('ISBN 13 er ekki á réttu formi'),
+  check('isbn10')
+    .optional()
+    .isISBN(10)
+    .withMessage('ISBN 10 er ekki á réttu formi'),
+  check('pagecount')
+    .optional()
+    .isInt({
+      min: 0,
+    })
+    .withMessage('Blaðsíðufjöldi verður að vera tala, stærri en 0'),
+  check('language')
+    .optional()
+    .isLength({
+      min: 2,
+      max: 2,
+    })
+    .withMessage('Tungumál verður að vera tveggja stafa strengur'),
+];
 
 /*
 GET skilar síðu af bókum
@@ -141,7 +176,7 @@ router.get(
 router.patch(
   '/:id',
   requireAuthentication,
-  bookValidation,
+  bookPatchValidation,
   check('id')
     .isInt()
     .withMessage('Id þarf að vera tala'),
