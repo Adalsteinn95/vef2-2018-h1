@@ -550,11 +550,13 @@ async function addReadBook({
 async function del(userID, bookID) {
   /* todo útfæra */
 
-  const queryString = 'DELETE FROM readBooks WHERE userID = $1 AND bookID = $2';
+  const queryString = 'DELETE FROM readBooks WHERE userid = $1 AND id = $2';
 
-  const values = [xss(userID), xss(bookID)];
+  const values = [userID, bookID];
+  console.log(bookID, userID);
 
   const result = await query(queryString, values);
+  console.log(result);
 
   return result;
 }

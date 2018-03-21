@@ -172,7 +172,8 @@ async function deleteReadBook(req, res) {
   const { id: bookID } = req.params;
   const { id } = req.user;
   const result = await db.del(id, bookID);
-  if (result) {
+  if (result.rowCount > 0) {
+    console.log(result);
     return res.status(204).json();
   }
   return res.status(404).json({ error: 'Bók fannst ekki' });
